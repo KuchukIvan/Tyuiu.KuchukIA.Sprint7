@@ -84,7 +84,6 @@
             panelMain_KIA.Padding = new Padding(15);
             panelMain_KIA.Size = new Size(500, 650);
             panelMain_KIA.TabIndex = 0;
-            panelMain_KIA.Paint += panelMain_KIA_Paint;
             // 
             // btnClose_KIA
             // 
