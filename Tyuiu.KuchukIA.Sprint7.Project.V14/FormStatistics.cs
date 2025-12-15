@@ -6,8 +6,15 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 {
     public partial class FormStatistics : Form
     {
-        string id, type, route, date, start, end, time;
-        string[,] data;
+        private string transportId;
+        private string transportType;
+        private string routeNumber;
+        private string startDate;
+        private string startStop;
+        private string endStop;
+        private string travelTime;
+
+        private string[,] routeData;
 
         public FormStatistics(string id, string type, string route,
                             string date, string start, string end,
@@ -15,121 +22,152 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
         {
             InitializeComponent();
 
-            this.id = id;
-            this.type = type;
-            this.route = route;
-            this.date = date;
-            this.start = start;
-            this.end = end;
-            this.time = time;
+            transportId = id;
+            transportType = type;
+            routeNumber = route;
+            startDate = date;
+            startStop = start;
+            endStop = end;
+            travelTime = time;
 
-            data = new string[array.Length, 8];
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    data[i, j] = array[i][j];
-                }
-            }
+            ConvertArrayToMatrix(array);
         }
 
         private void FormStatistics_Load(object sender, EventArgs e)
         {
-            this.Text = "Статистика маршрута " + type + " №" + route;
-            lblTitle_KIA.Text = "СТАТИСТИКА\n" + type.ToUpper() + " №" + route;
-
-            txtTotalCount_KIA.Text = data.GetLength(0) + " шт.";
-            txtMinTime_KIA.Text = MinTime() + " мин";
-            txtMaxTime_KIA.Text = MaxTime() + " мин";
-            txtAvgTime_KIA.Text = AvgTime() + " мин";
-
-            txtSelectedID_KIA.Text = id;
-            txtTravelTime_KIA.Text = time + " мин";
-            txtStartStop_KIA.Text = start;
-            txtEndStop_KIA.Text = end;
-            txtDate_KIA.Text = FormatDate(date);
+            SetupForm();
+            DisplayStatistics();
+            DisplaySelectedRouteInfo();
         }
 
-        int MinTime()
+        private void ConvertArrayToMatrix(string[][] array)
         {
-            if (data.GetLength(0) == 0) return 0;
+            int rows = array.Length;
+            int cols = 8;
+            routeData = new string[rows, cols];
 
-            int min = int.MaxValue;
-
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
-                if (int.TryParse(data[i, 6], out int t))
+                for (int j = 0; j < cols; j++)
                 {
-                    if (t < min)
-                        min = t;
+                    routeData[i, j] = array[i][j];
+                }
+            }
+        }
+
+        private void SetupForm()
+        {
+            this.Text = $"Статистика маршрута {transportType} №{routeNumber}";
+            lblTitle_KIA.Text = $"СТАТИСТИКА\n{transportType.ToUpper()} №{routeNumber}";
+        }
+
+        private void DisplayStatistics()
+        {
+            int totalRoutes = routeData.GetLength(0);
+
+            txtTotalCount_KIA.Text = $"{totalRoutes} шт.";
+            txtMinTime_KIA.Text = $"{CalculateMinTime()} мин";
+            txtMaxTime_KIA.Text = $"{CalculateMaxTime()} мин";
+            txtAvgTime_KIA.Text = $"{CalculateAverageTime()} мин";
+        }
+
+        private void DisplaySelectedRouteInfo()
+        {
+            txtSelectedID_KIA.Text = transportId;
+            txtTravelTime_KIA.Text = $"{travelTime} мин";
+            txtStartStop_KIA.Text = startStop;
+            txtEndStop_KIA.Text = endStop;
+            txtDate_KIA.Text = FormatDate(startDate);
+        }
+
+        private int CalculateMinTime()
+        {
+            if (routeData.GetLength(0) == 0) return 0;
+
+            int minTime = int.MaxValue;
+
+            for (int i = 0; i < routeData.GetLength(0); i++)
+            {
+                if (int.TryParse(routeData[i, 6], out int currentTime))
+                {
+                    if (currentTime < minTime)
+                        minTime = currentTime;
                 }
             }
 
-            return (min == int.MaxValue) ? 0 : min;
+            return minTime == int.MaxValue ? 0 : minTime;
         }
 
-        int MaxTime()
+        private int CalculateMaxTime()
         {
-            if (data.GetLength(0) == 0) return 0;
+            if (routeData.GetLength(0) == 0) return 0;
 
-            int max = 0;
+            int maxTime = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < routeData.GetLength(0); i++)
             {
-                if (int.TryParse(data[i, 6], out int t))
+                if (int.TryParse(routeData[i, 6], out int currentTime))
                 {
-                    if (t > max)
-                        max = t;
+                    if (currentTime > maxTime)
+                        maxTime = currentTime;
                 }
             }
 
-            return max;
+            return maxTime;
         }
 
-        string AvgTime()
+        private string CalculateAverageTime()
         {
-            if (data.GetLength(0) == 0) return "0.0";
+            int totalRoutes = routeData.GetLength(0);
+            if (totalRoutes == 0) return "0.0";
 
             int sum = 0;
-            int count = 0;
+            int validCount = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < totalRoutes; i++)
             {
-                if (int.TryParse(data[i, 6], out int t))
+                if (int.TryParse(routeData[i, 6], out int currentTime))
                 {
-                    sum += t;
-                    count++;
+                    sum += currentTime;
+                    validCount++;
                 }
             }
 
-            if (count == 0) return "0.0";
+            if (validCount == 0) return "0.0";
 
-            double avg = (double)sum / count;
-            return avg.ToString("F1");
+            double average = (double)sum / validCount;
+            return average.ToString("F1");
         }
 
-        string FormatDate(string d)
+        private string FormatDate(string dateString)
         {
-            if (d.Contains("."))
-                return d;
+            if (dateString.Contains("."))
+                return dateString;
 
             try
             {
-                DateTime dt = DateTime.Parse(d);
-                return dt.ToString("dd.MM.yyyy");
+                DateTime date = DateTime.Parse(dateString);
+                return date.ToString("dd.MM.yyyy");
             }
             catch
             {
-                return d;
+                return dateString;
             }
         }
 
         private void BtnShowChart_KIA_Click(object sender, EventArgs e)
         {
-            FormChart chart = new FormChart(id, type, route, date,
-                                          start, end, time, data);
-            chart.ShowDialog();
+            ShowChartForm();
+        }
+
+        private void ShowChartForm()
+        {
+            FormChart chartForm = new FormChart(
+                transportId, transportType, routeNumber, startDate,
+                startStop, endStop, travelTime, routeData
+            );
+
+            chartForm.ShowDialog();
         }
 
         private void BtnClose_KIA_Click(object sender, EventArgs e)

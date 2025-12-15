@@ -8,13 +8,12 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
 {
     public class DataService
     {
-  
         public string[,] LoadFromFile(string path)
         {
             if (!File.Exists(path)) return new string[0, 8];
 
             string[] lines = File.ReadAllLines(path, Encoding.UTF8);
-            string[,] data = new string[lines.Length, 8];
+            string[,] array = new string[lines.Length, 8];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -22,25 +21,24 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
                 for (int j = 0; j < 8; j++)
                 {
                     if (j < parts.Length)
-                        data[i, j] = parts[j];
+                        array[i, j] = parts[j];
                     else
-                        data[i, j] = "";
+                        array[i, j] = "";
                 }
             }
-            return data;
+            return array;
         }
 
- 
-        public void SaveToFile(string path, string[,] data)
+        public void SaveToFile(string path, string[,] array)
         {
             List<string> lines = new List<string>();
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
                 string line = "";
                 for (int j = 0; j < 8; j++)
                 {
-                    line += data[i, j];
+                    line += array[i, j];
                     if (j < 7) line += ";";
                 }
                 lines.Add(line);
@@ -49,176 +47,176 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
             File.WriteAllLines(path, lines, Encoding.UTF8);
         }
 
-
-        public string[,] Search(string[,] data, string text)
+        public string[,] Search(string[,] array, string text)
         {
             List<string[]> result = new List<string[]>();
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                bool found = false;
-
                 for (int j = 0; j < 8; j++)
                 {
-                    if (data[i, j].ToLower().Contains(text.ToLower()))
+                    if (array[i, j].ToLower().Contains(text.ToLower()))
                     {
-                        found = true;
+                        string[] row = new string[8];
+                        for (int k = 0; k < 8; k++)
+                            row[k] = array[i, k];
+
+                        result.Add(row);
                         break;
                     }
-                }
-
-                if (found)
-                {
-                    string[] row = new string[8];
-                    for (int j = 0; j < 8; j++)
-                        row[j] = data[i, j];
-                    result.Add(row);
                 }
             }
 
             string[,] final = new string[result.Count, 8];
             for (int i = 0; i < result.Count; i++)
-            {
                 for (int j = 0; j < 8; j++)
                     final[i, j] = result[i][j];
-            }
 
             return final;
         }
 
-
-        public int VehicleAmount(string[,] data)
+        public int VehicleAmount(string[,] array)
         {
-            return data.GetLength(0);
+            return array.GetLength(0);
         }
 
-
-        public int RouteAmount(string[,] data)
+        public int RouteAmount(string[,] array)
         {
-            HashSet<string> routes = new HashSet<string>();
+            string[] used = new string[array.GetLength(0)];
 
-            for (int i = 0; i < data.GetLength(0); i++)
-                routes.Add(data[i, 2]);
-
-            return routes.Count;
-        }
-
-
-        public int MinTime(string[,] data)
-        {
-            int min = int.MaxValue;
-
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (int.TryParse(data[i, 6], out int time))
-                {
-                    if (time < min)
-                        min = time;
-                }
+                if (!used.Contains(array[i, 2]))
+                    used[i] = array[i, 2];
             }
 
-            return (min == int.MaxValue) ? 0 : min;
+            return used.Count(id => id != null);
         }
 
+        public int MinTime(string[,] array)
+        {
+            int min = 999999;
 
-        public int MaxTime(string[,] data)
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                try
+                {
+                    int time = Convert.ToInt32(array[i, 6]);
+                    if (time < min) min = time;
+                }
+                catch { }
+            }
+
+            return min == 999999 ? 0 : min;
+        }
+
+        public int MaxTime(string[,] array)
         {
             int max = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (int.TryParse(data[i, 6], out int time))
+                try
                 {
-                    if (time > max)
-                        max = time;
+                    int time = Convert.ToInt32(array[i, 6]);
+                    if (time > max) max = time;
                 }
+                catch { }
             }
 
             return max;
         }
 
-
-        public int AvgTime(string[,] data)
+        public int AvgTime(string[,] array)
         {
             int sum = 0;
             int count = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (int.TryParse(data[i, 6], out int time))
+                try
                 {
-                    sum += time;
+                    sum += Convert.ToInt32(array[i, 6]);
                     count++;
                 }
+                catch { }
             }
 
-            return (count == 0) ? 0 : sum / count;
+            return count == 0 ? 0 : sum / count;
         }
 
-
-        public int RouteAmount_Route(string[,] data, string route)
+        public int RouteAmount_Route(string[,] array, string route)
         {
             int count = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (data[i, 2] == route)
+                if (array[i, 2] == route)
                     count++;
             }
 
             return count;
         }
 
-
-        public int MinTime_Route(string[,] data, string route)
+        public int MinTime_Route(string[,] array, string route)
         {
-            int min = int.MaxValue;
+            int min = 999999;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (data[i, 2] == route && int.TryParse(data[i, 6], out int time))
+                if (array[i, 2] == route)
                 {
-                    if (time < min)
-                        min = time;
+                    try
+                    {
+                        int time = Convert.ToInt32(array[i, 6]);
+                        if (time < min) min = time;
+                    }
+                    catch { }
                 }
             }
 
-            return (min == int.MaxValue) ? 0 : min;
+            return min == 999999 ? 0 : min;
         }
 
-
-        public int MaxTime_Route(string[,] data, string route)
+        public int MaxTime_Route(string[,] array, string route)
         {
             int max = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (data[i, 2] == route && int.TryParse(data[i, 6], out int time))
+                if (array[i, 2] == route)
                 {
-                    if (time > max)
-                        max = time;
+                    try
+                    {
+                        int time = Convert.ToInt32(array[i, 6]);
+                        if (time > max) max = time;
+                    }
+                    catch { }
                 }
             }
 
             return max;
         }
 
-
-        public int AvgTime_Route(string[,] data, string route)
+        public int AvgTime_Route(string[,] array, string route)
         {
             int sum = 0;
             int count = 0;
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                if (data[i, 2] == route && int.TryParse(data[i, 6], out int time))
+                if (array[i, 2] == route)
                 {
-                    sum += time;
-                    count++;
+                    try
+                    {
+                        sum += Convert.ToInt32(array[i, 6]);
+                        count++;
+                    }
+                    catch { }
                 }
             }
 
-            return (count == 0) ? 0 : sum / count;
+            return count == 0 ? 0 : sum / count;
         }
     }
 }

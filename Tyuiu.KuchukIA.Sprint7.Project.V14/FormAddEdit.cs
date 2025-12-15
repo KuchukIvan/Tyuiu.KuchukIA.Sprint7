@@ -1,29 +1,31 @@
 ﻿using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 {
     public partial class FormAddEdit : Form
     {
-        public string[] ResultRow { get; private set; }
-        private bool editMode = false;
-        private string[] oldRow;
+        public string[] ResultRow;
+
+        private string originalId;
 
         public FormAddEdit()
         {
             InitializeComponent();
-            editMode = false;
-            this.Text = "Добавить новый маршрут";
+            Text = "Добавить новый маршрут";
+            originalId = "0";
         }
 
         public FormAddEdit(string[] row)
         {
             InitializeComponent();
-            editMode = true;
-            oldRow = row;
-            this.Text = "Редактировать маршрут №" + row[2];
+            Text = $"Редактировать маршрут №{row[2]}";
+            originalId = row[0];
+            FillFields(row);
+        }
 
+        private void FillFields(string[] row)
+        {
             comboBoxType_KIA.Text = row[1];
             textBoxRoute_KIA.Text = row[2];
             textBoxDate_KIA.Text = row[3];
@@ -38,28 +40,42 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
         private void FormAddEdit_Load(object sender, EventArgs e)
         {
-            this.ActiveControl = null;
+            ActiveControl = null;
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            if (textBoxRoute_KIA.Text == "" ||
-                textBoxStart_KIA.Text == "" ||
-                textBoxEnd_KIA.Text == "")
+            if (CheckFields())
+            {
+                SaveData();
+            }
+            else
+            {
+                DialogResult = DialogResult.None;
+            }
+        }
+
+        private bool CheckFields()
+        {
+            bool routeOk = !string.IsNullOrWhiteSpace(textBoxRoute_KIA.Text);
+            bool startOk = !string.IsNullOrWhiteSpace(textBoxStart_KIA.Text);
+            bool endOk = !string.IsNullOrWhiteSpace(textBoxEnd_KIA.Text);
+
+            if (!routeOk || !startOk || !endOk)
             {
                 MessageBox.Show("Заполните обязательные поля!", "Внимание",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                this.DialogResult = DialogResult.None;
-                return;
+                return false;
             }
 
+            return true;
+        }
+
+        private void SaveData()
+        {
             ResultRow = new string[8];
 
-            if (editMode)
-                ResultRow[0] = oldRow[0];
-            else
-                ResultRow[0] = "0";
-
+            ResultRow[0] = originalId;
             ResultRow[1] = comboBoxType_KIA.Text;
             ResultRow[2] = textBoxRoute_KIA.Text;
             ResultRow[3] = textBoxDate_KIA.Text;
