@@ -24,6 +24,11 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
         {
             this.Close();
         }
+
+        private void labelInfo_KIA_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

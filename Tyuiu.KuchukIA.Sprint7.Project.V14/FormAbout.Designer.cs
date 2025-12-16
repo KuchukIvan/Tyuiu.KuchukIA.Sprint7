@@ -39,24 +39,25 @@
             // 
             labelInfo_KIA.AutoSize = true;
             labelInfo_KIA.Font = new Font("Arial", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            labelInfo_KIA.Location = new Point(170, 12);
+            labelInfo_KIA.Location = new Point(144, 12);
             labelInfo_KIA.Name = "labelInfo_KIA";
             labelInfo_KIA.Size = new Size(372, 204);
             labelInfo_KIA.TabIndex = 0;
             labelInfo_KIA.Text = resources.GetString("labelInfo_KIA.Text");
+            labelInfo_KIA.Click += labelInfo_KIA_Click;
             // 
             // pictureBoxAvatar_KIA
             // 
             pictureBoxAvatar_KIA.Location = new Point(12, 12);
             pictureBoxAvatar_KIA.Name = "pictureBoxAvatar_KIA";
-            pictureBoxAvatar_KIA.Size = new Size(140, 151);
+            pictureBoxAvatar_KIA.Size = new Size(126, 163);
             pictureBoxAvatar_KIA.TabIndex = 1;
             pictureBoxAvatar_KIA.TabStop = false;
             // 
             // buttonOk_KIA
             // 
             buttonOk_KIA.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            buttonOk_KIA.Location = new Point(455, 182);
+            buttonOk_KIA.Location = new Point(413, 185);
             buttonOk_KIA.Name = "buttonOk_KIA";
             buttonOk_KIA.Size = new Size(103, 31);
             buttonOk_KIA.TabIndex = 2;
@@ -68,7 +69,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(570, 224);
+            ClientSize = new Size(528, 222);
             Controls.Add(buttonOk_KIA);
             Controls.Add(pictureBoxAvatar_KIA);
             Controls.Add(labelInfo_KIA);
