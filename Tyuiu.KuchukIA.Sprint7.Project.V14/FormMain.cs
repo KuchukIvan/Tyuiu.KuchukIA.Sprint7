@@ -176,5 +176,181 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
             return array;
         }
+
+        private void Filter()
+        {
+            List<string[]> result = new List<string[]>();
+            string searchText = toolStripTextBoxSearch_KIA.Text;
+            string[,] tempData = data;
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                tempData = ds.Search(data, searchText);
+            }
+
+            for (int i = 0; i < tempData.GetLength(0); i++)
+            {
+                bool matchesFilter = CheckFilters(tempData, i);
+
+                if (matchesFilter)
+                {
+                    string[] row = new string[columns];
+                    for (int j = 0; j < columns; j++)
+                    {
+                        row[j] = tempData[i, j];
+                    }
+                    result.Add(row);
+                }
+            }
+
+            filtered = ConvertToArray(result);
+            rows = filtered.GetLength(0);
+
+            if (!string.IsNullOrEmpty(sortColumn))
+                SortData();
+            else
+                ShowData();
+
+            UpdateStats();
+        }
+
+        private bool CheckFilters(string[,] tempData, int index)
+        {
+            if (numericUpDownFilterID_KIA.Value != 0)
+            {
+                if (Convert.ToInt32(tempData[index, 0]) != (int)numericUpDownFilterID_KIA.Value)
+                    return false;
+            }
+
+            if (comboBoxFilterType_KIA.SelectedIndex > 0)
+            {
+                if (tempData[index, 1] != comboBoxFilterType_KIA.Text)
+                    return false;
+            }
+
+            if (numericUpDownFilterRoute_KIA.Value != 0)
+            {
+                if (tempData[index, 2] != numericUpDownFilterRoute_KIA.Value.ToString())
+                    return false;
+            }
+
+            if (!string.IsNullOrEmpty(textBoxFilterStart_KIA.Text))
+            {
+                if (!tempData[index, 4].ToLower().Contains(textBoxFilterStart_KIA.Text.ToLower()))
+                    return false;
+            }
+
+            if (!string.IsNullOrEmpty(textBoxFilterEnd_KIA.Text))
+            {
+                if (!tempData[index, 5].ToLower().Contains(textBoxFilterEnd_KIA.Text.ToLower()))
+                    return false;
+            }
+
+            if (numericUpDownMinTime_KIA.Value != 0)
+            {
+                if (Convert.ToInt32(tempData[index, 6]) < (int)numericUpDownMinTime_KIA.Value)
+                    return false;
+            }
+
+            if (numericUpDownMaxTime_KIA.Value != 0)
+            {
+                if (Convert.ToInt32(tempData[index, 6]) > (int)numericUpDownMaxTime_KIA.Value)
+                    return false;
+            }
+
+            DateTime date = DateTime.Parse(tempData[index, 3]);
+            if (date < dateTimePickerMinDate_KIA.Value.Date || date > dateTimePickerMaxDate_KIA.Value.Date)
+                return false;
+
+            return true;
+        }
+
+
+        private void UpdateStats()
+        {
+            if (data.GetLength(0) == 0)
+            {
+                ClearStats();
+                return;
+            }
+
+            textBoxStatsTransportCount_KIA.Text = ds.VehicleAmount(data).ToString();
+            textBoxStatsRoutesCount_KIA.Text = ds.RouteAmount(data).ToString();
+
+            int buses = 0, trams = 0, trolleys = 0, minibuses = 0;
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                switch (data[i, 1])
+                {
+                    case "Автобус": buses++; break;
+                    case "Трамвай": trams++; break;
+                    case "Троллейбус": trolleys++; break;
+                    case "Маршрутка": minibuses++; break;
+                }
+            }
+
+            textBoxStatsBuses_KIA.Text = buses.ToString();
+            textBoxStatsTrams_KIA.Text = trams.ToString();
+            textBoxStatsTrolleys_KIA.Text = trolleys.ToString();
+            textBoxStatsMinibuses_KIA.Text = minibuses.ToString();
+
+            textBoxStatsMinTime_KIA.Text = ds.MinTime(data).ToString();
+            textBoxStatsMaxTime_KIA.Text = ds.MaxTime(data).ToString();
+            textBoxStatsAvgTime_KIA.Text = ds.AvgTime(data).ToString();
+
+            int minTime = ds.MinTime(data);
+            int maxTime = ds.MaxTime(data);
+            string shortest = "нет";
+            string longest = "нет";
+
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                if (Convert.ToInt32(data[i, 6]) == minTime)
+                    shortest = $"№{data[i, 2]} ({minTime} мин)";
+                if (Convert.ToInt32(data[i, 6]) == maxTime)
+                    longest = $"№{data[i, 2]} ({maxTime} мин)";
+            }
+
+            textBoxStatsShortest_KIA.Text = shortest;
+            textBoxStatsLongest_KIA.Text = longest;
+        }
+
+        private void ClearStats()
+        {
+            textBoxStatsTransportCount_KIA.Text = "0";
+            textBoxStatsRoutesCount_KIA.Text = "0";
+            textBoxStatsBuses_KIA.Text = "0";
+            textBoxStatsTrams_KIA.Text = "0";
+            textBoxStatsTrolleys_KIA.Text = "0";
+            textBoxStatsMinibuses_KIA.Text = "0";
+            textBoxStatsMinTime_KIA.Text = "0";
+            textBoxStatsMaxTime_KIA.Text = "0";
+            textBoxStatsAvgTime_KIA.Text = "0";
+            textBoxStatsShortest_KIA.Text = "нет";
+            textBoxStatsLongest_KIA.Text = "нет";
+        }
+
+        private void buttonResetFilter_KIA_Click(object sender, EventArgs e)
+        {
+            ResetFilters();
+            filtered = (string[,])data.Clone();
+            rows = data.GetLength(0);
+            ShowData();
+            UpdateStats();
+        }
+
+        private void ResetFilters()
+        {
+            numericUpDownFilterID_KIA.Value = 0;
+            comboBoxFilterType_KIA.SelectedIndex = 0;
+            numericUpDownFilterRoute_KIA.Value = 0;
+            textBoxFilterStart_KIA.Text = "";
+            textBoxFilterEnd_KIA.Text = "";
+            numericUpDownMinTime_KIA.Value = 0;
+            numericUpDownMaxTime_KIA.Value = 0;
+            toolStripTextBoxSearch_KIA.Text = "";
+            dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
+            dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
+        }
     }
 }
