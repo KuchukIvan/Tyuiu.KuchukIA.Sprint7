@@ -352,5 +352,98 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
             dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
         }
+
+
+
+        private void ToolStripMenuItemNewTable_KIA_Click(object sender, EventArgs e)
+        {
+            if (data.GetLength(0) > 0)
+            {
+                DialogResult result = MessageBox.Show(
+                    "Создать новую таблицу? Все несохранённые данные будут потеряны.",
+                    "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result != DialogResult.Yes) return;
+            }
+
+            ClearAll();
+        }
+
+        private void toolStripMenuItemOpen_KIA_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "CSV файлы (*.csv)|*.csv|Все файлы (*.*)|*.*";
+            dlg.Title = "Открыть файл";
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    currentFile = dlg.FileName;
+                    data = ds.LoadFromFile(currentFile);
+                    filtered = (string[,])data.Clone();
+                    rows = data.GetLength(0);
+
+                    ShowData();
+                    UpdateStats();
+
+                    MessageBox.Show($"Загружено {rows} записей", "Успешно",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void toolStripMenuItemSave_KIA_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentFile))
+            {
+                toolStripMenuItemSaveAs_KIA_Click(sender, e);
+                return;
+            }
+
+            try
+            {
+                ds.SaveToFile(currentFile, data);
+                MessageBox.Show("Файл сохранён", "Сохранение",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void toolStripMenuItemSaveAs_KIA_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "CSV файлы (*.csv)|*.csv";
+            dlg.Title = "Сохранить файл";
+            dlg.FileName = "transport.csv";
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                currentFile = dlg.FileName;
+                toolStripMenuItemSave_KIA_Click(sender, e);
+            }
+        }
+
+        private void ClearAll()
+        {
+            data = new string[0, columns];
+            filtered = new string[0, columns];
+            rows = 0;
+            dataGridViewTransports_KIA.Rows.Clear();
+            currentFile = "";
+            sortColumn = "";
+            sortOrder = SortOrder.None;
+            ResetFilters();
+            UpdateStats();
+        }
     }
 }
