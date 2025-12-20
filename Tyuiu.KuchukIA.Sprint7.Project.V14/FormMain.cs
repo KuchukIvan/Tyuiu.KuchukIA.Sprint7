@@ -145,38 +145,6 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             ShowData();
         }
 
-        private List<string[]> ConvertToList(string[,] array)
-        {
-            List<string[]> list = new List<string[]>();
-
-            for (int i = 0; i < array.GetLength(0); i++)
-            {
-                string[] row = new string[columns];
-                for (int j = 0; j < columns; j++)
-                {
-                    row[j] = array[i, j];
-                }
-                list.Add(row);
-            }
-
-            return list;
-        }
-
-        private string[,] ConvertToArray(List<string[]> list)
-        {
-            string[,] array = new string[list.Count, columns];
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                for (int j = 0; j < columns; j++)
-                {
-                    array[i, j] = list[i][j];
-                }
-            }
-
-            return array;
-        }
-
         private void Filter()
         {
             List<string[]> result = new List<string[]>();
@@ -265,7 +233,6 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             return true;
         }
 
-
         private void UpdateStats()
         {
             if (data.GetLength(0) == 0)
@@ -330,30 +297,37 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             textBoxStatsLongest_KIA.Text = "нет";
         }
 
-        private void buttonResetFilter_KIA_Click(object sender, EventArgs e)
+        private List<string[]> ConvertToList(string[,] array)
         {
-            ResetFilters();
-            filtered = (string[,])data.Clone();
-            rows = data.GetLength(0);
-            ShowData();
-            UpdateStats();
+            List<string[]> list = new List<string[]>();
+
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                string[] row = new string[columns];
+                for (int j = 0; j < columns; j++)
+                {
+                    row[j] = array[i, j];
+                }
+                list.Add(row);
+            }
+
+            return list;
         }
 
-        private void ResetFilters()
+        private string[,] ConvertToArray(List<string[]> list)
         {
-            numericUpDownFilterID_KIA.Value = 0;
-            comboBoxFilterType_KIA.SelectedIndex = 0;
-            numericUpDownFilterRoute_KIA.Value = 0;
-            textBoxFilterStart_KIA.Text = "";
-            textBoxFilterEnd_KIA.Text = "";
-            numericUpDownMinTime_KIA.Value = 0;
-            numericUpDownMaxTime_KIA.Value = 0;
-            toolStripTextBoxSearch_KIA.Text = "";
-            dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
-            dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
+            string[,] array = new string[list.Count, columns];
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    array[i, j] = list[i][j];
+                }
+            }
+
+            return array;
         }
-
-
 
         private void ToolStripMenuItemNewTable_KIA_Click(object sender, EventArgs e)
         {
@@ -433,6 +407,261 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             }
         }
 
+        private void toolStripButtonAdd_KIA_Click(object sender, EventArgs e)
+        {
+            FormAddEdit form = new FormAddEdit();
+            if (form.ShowDialog() == DialogResult.OK && form.ResultRow != null)
+            {
+                int newID = GetMaxID() + 1;
+                string[] row = form.ResultRow;
+                row[0] = newID.ToString();
+
+                data = AddRow(data, row);
+                filtered = (string[,])data.Clone();
+                rows = data.GetLength(0);
+
+                if (!string.IsNullOrEmpty(sortColumn))
+                    SortData();
+                else
+                    ShowData();
+
+                UpdateStats();
+            }
+        }
+
+        private void toolStripButtonEdit_KIA_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewTransports_KIA.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите запись для редактирования", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int index = dataGridViewTransports_KIA.SelectedRows[0].Index;
+            if (index >= rows) return;
+
+            string[] row = new string[columns];
+            for (int j = 0; j < columns; j++)
+            {
+                row[j] = filtered[index, j];
+            }
+
+            FormAddEdit form = new FormAddEdit(row);
+            if (form.ShowDialog() == DialogResult.OK && form.ResultRow != null)
+            {
+                UpdateRow(row[0], form.ResultRow);
+
+                if (!string.IsNullOrEmpty(sortColumn))
+                    SortData();
+                else
+                    ShowData();
+
+                UpdateStats();
+            }
+        }
+
+        private int GetMaxID()
+        {
+            int max = 0;
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                try
+                {
+                    int id = Convert.ToInt32(data[i, 0]);
+                    if (id > max) max = id;
+                }
+                catch { }
+            }
+            return max;
+        }
+
+        private void UpdateRow(string id, string[] newData)
+        {
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                if (data[i, 0] == id)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        data[i, j] = newData[j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < filtered.GetLength(0); i++)
+            {
+                if (filtered[i, 0] == id)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        filtered[i, j] = newData[j];
+                    }
+                }
+            }
+        }
+
+        private string[,] AddRow(string[,] array, string[] row)
+        {
+            int currentRows = array.GetLength(0);
+            string[,] newArray = new string[currentRows + 1, columns];
+
+            for (int i = 0; i < currentRows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    newArray[i, j] = array[i, j];
+                }
+            }
+
+            for (int j = 0; j < columns; j++)
+            {
+                newArray[currentRows, j] = row[j];
+            }
+
+            return newArray;
+        }
+
+        private void toolStripButtonDelete_KIA_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewTransports_KIA.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите запись для удаления", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(
+                "Удалить выбранную запись?",
+                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                int index = dataGridViewTransports_KIA.SelectedRows[0].Index;
+                if (index < rows)
+                {
+                    string id = filtered[index, 0];
+
+                    data = RemoveRow(data, id);
+                    filtered = RemoveRow(filtered, id);
+                    rows = data.GetLength(0);
+
+                    ShowData();
+                    UpdateStats();
+                }
+            }
+        }
+
+        private void toolStripButtonStats_KIA_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewTransports_KIA.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите маршрут для статистики", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int index = dataGridViewTransports_KIA.SelectedRows[0].Index;
+            if (index >= rows) return;
+
+            List<string[]> sameType = new List<string[]>();
+
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                if (data[i, 2] == filtered[index, 2] && data[i, 1] == filtered[index, 1])
+                {
+                    string[] row = new string[columns];
+                    for (int j = 0; j < columns; j++)
+                    {
+                        row[j] = data[i, j];
+                    }
+                    sameType.Add(row);
+                }
+            }
+
+            if (sameType.Count > 0)
+            {
+                FormStatistics stats = new FormStatistics(
+                    filtered[index, 0], filtered[index, 1], filtered[index, 2],
+                    filtered[index, 3], filtered[index, 4], filtered[index, 5],
+                    filtered[index, 6], sameType.ToArray()
+                );
+                stats.ShowDialog();
+            }
+        }
+
+        private void buttonResetFilter_KIA_Click(object sender, EventArgs e)
+        {
+            ResetFilters();
+            filtered = (string[,])data.Clone();
+            rows = data.GetLength(0);
+            ShowData();
+            UpdateStats();
+        }
+
+        private void ResetFilters()
+        {
+            numericUpDownFilterID_KIA.Value = 0;
+            comboBoxFilterType_KIA.SelectedIndex = 0;
+            numericUpDownFilterRoute_KIA.Value = 0;
+            textBoxFilterStart_KIA.Text = "";
+            textBoxFilterEnd_KIA.Text = "";
+            numericUpDownMinTime_KIA.Value = 0;
+            numericUpDownMaxTime_KIA.Value = 0;
+            toolStripTextBoxSearch_KIA.Text = "";
+            dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
+            dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
+        }
+
+        private string[,] RemoveRow(string[,] array, string id)
+        {
+            List<string[]> list = new List<string[]>();
+
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                if (array[i, 0] != id)
+                {
+                    string[] row = new string[columns];
+                    for (int j = 0; j < columns; j++)
+                    {
+                        row[j] = array[i, j];
+                    }
+                    list.Add(row);
+                }
+            }
+
+            return ConvertToArray(list);
+        }
+
+        private void toolStripMenuItemManual_KIA_Click(object sender, EventArgs e)
+        {
+            string help = @"РУКОВОДСТВО ПОЛЬЗОВАТЕЛЯ
+
+Основные функции:
+• Открыть, сохранить, создать новую таблицу
+
+Работа с данными:
+• Добавить, редактировать, удалить записи
+• Просмотр статистики по маршрутам
+
+Фильтрация:
+• Используйте поля справа для поиска
+• Фильтры работают в реальном времени
+
+Сортировка:
+• Кликните по заголовку столбца
+• Повторный клик меняет порядок";
+
+            MessageBox.Show(help, "Руководство",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void toolStripMenuItemAbout_KIA_Click(object sender, EventArgs e)
+        {
+            FormAbout about = new FormAbout();
+            about.ShowDialog();
+        }
+
         private void ClearAll()
         {
             data = new string[0, columns];
@@ -445,5 +674,21 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             ResetFilters();
             UpdateStats();
         }
+
+        // Обработчики событий фильтров
+        private void numericUpDownFilterID_KIA_ValueChanged(object sender, EventArgs e) => Filter();
+        private void numericUpDownFilterRoute_KIA_ValueChanged(object sender, EventArgs e) => Filter();
+        private void numericUpDownMinTime_KIA_ValueChanged(object sender, EventArgs e) => Filter();
+        private void numericUpDownMaxTime_KIA_ValueChanged(object sender, EventArgs e) => Filter();
+        private void comboBoxFilterType_KIA_SelectedIndexChanged(object sender, EventArgs e) => Filter();
+        private void dateTimePickerMinDate_KIA_ValueChanged(object sender, EventArgs e) => Filter();
+        private void dateTimePickerMaxDate_KIA_ValueChanged(object sender, EventArgs e) => Filter();
+        private void textBoxFilterStart_KIA_TextChanged(object sender, EventArgs e) => Filter();
+        private void textBoxFilterEnd_KIA_TextChanged(object sender, EventArgs e) => Filter();
+        private void toolStripTextBoxSearch_KIA_TextChanged(object sender, EventArgs e) => Filter();
+
+        private void dataGridViewTransports_KIA_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
+        private void labelFilterID_KIA_Click(object sender, EventArgs e) { }
     }
 }
+

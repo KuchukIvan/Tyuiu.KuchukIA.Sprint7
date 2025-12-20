@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
@@ -12,8 +10,8 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
         {
             if (!File.Exists(path)) return new string[0, 8];
 
-            string[] lines = File.ReadAllLines(path, Encoding.UTF8);
-            string[,] array = new string[lines.Length, 8];
+            string[] lines = File.ReadAllLines(path);
+            string[,] result = new string[lines.Length, 8];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -21,19 +19,21 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
                 for (int j = 0; j < 8; j++)
                 {
                     if (j < parts.Length)
-                        array[i, j] = parts[j];
+                        result[i, j] = parts[j];
                     else
-                        array[i, j] = "";
+                        result[i, j] = "";
                 }
             }
-            return array;
+
+            return result;
         }
 
         public void SaveToFile(string path, string[,] array)
         {
-            List<string> lines = new List<string>();
+            int rows = array.GetLength(0);
+            string[] lines = new string[rows];
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 string line = "";
                 for (int j = 0; j < 8; j++)
@@ -41,38 +41,55 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
                     line += array[i, j];
                     if (j < 7) line += ";";
                 }
-                lines.Add(line);
+                lines[i] = line;
             }
 
-            File.WriteAllLines(path, lines, Encoding.UTF8);
+            File.WriteAllLines(path, lines);
         }
 
         public string[,] Search(string[,] array, string text)
         {
-            List<string[]> result = new List<string[]>();
+            int count = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
+                bool found = false;
                 for (int j = 0; j < 8; j++)
                 {
                     if (array[i, j].ToLower().Contains(text.ToLower()))
                     {
-                        string[] row = new string[8];
-                        for (int k = 0; k < 8; k++)
-                            row[k] = array[i, k];
-
-                        result.Add(row);
+                        found = true;
                         break;
                     }
                 }
+                if (found) count++;
             }
 
-            string[,] final = new string[result.Count, 8];
-            for (int i = 0; i < result.Count; i++)
-                for (int j = 0; j < 8; j++)
-                    final[i, j] = result[i][j];
+            string[,] result = new string[count, 8];
+            int index = 0;
 
-            return final;
+            for (int i = 0; i < rows; i++)
+            {
+                bool found = false;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (array[i, j].ToLower().Contains(text.ToLower()))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    for (int j = 0; j < 8; j++)
+                        result[index, j] = array[i, j];
+                    index++;
+                }
+            }
+
+            return result;
         }
 
         public int VehicleAmount(string[,] array)
@@ -82,43 +99,55 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
 
         public int RouteAmount(string[,] array)
         {
-            string[] used = new string[array.GetLength(0)];
+            int count = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
-                if (!used.Contains(array[i, 2]))
-                    used[i] = array[i, 2];
+                bool seen = false;
+                for (int j = 0; j < i; j++)
+                {
+                    if (array[j, 2] == array[i, 2])
+                    {
+                        seen = true;
+                        break;
+                    }
+                }
+                if (!seen) count++;
             }
 
-            return used.Count(id => id != null);
+            return count;
         }
 
         public int MinTime(string[,] array)
         {
-            int min = 999999;
+            int min = 1000000;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 try
                 {
-                    int time = Convert.ToInt32(array[i, 6]);
+                    int time = int.Parse(array[i, 6]);
                     if (time < min) min = time;
                 }
                 catch { }
             }
 
-            return min == 999999 ? 0 : min;
+            if (min == 1000000) return 0;
+            return min;
         }
 
         public int MaxTime(string[,] array)
         {
             int max = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 try
                 {
-                    int time = Convert.ToInt32(array[i, 6]);
+                    int time = int.Parse(array[i, 6]);
                     if (time > max) max = time;
                 }
                 catch { }
@@ -131,28 +160,30 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
         {
             int sum = 0;
             int count = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 try
                 {
-                    sum += Convert.ToInt32(array[i, 6]);
+                    sum += int.Parse(array[i, 6]);
                     count++;
                 }
                 catch { }
             }
 
-            return count == 0 ? 0 : sum / count;
+            if (count == 0) return 0;
+            return sum / count;
         }
 
         public int RouteAmount_Route(string[,] array, string route)
         {
             int count = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
-                if (array[i, 2] == route)
-                    count++;
+                if (array[i, 2] == route) count++;
             }
 
             return count;
@@ -160,35 +191,38 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
 
         public int MinTime_Route(string[,] array, string route)
         {
-            int min = 999999;
+            int min = 1000000;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 if (array[i, 2] == route)
                 {
                     try
                     {
-                        int time = Convert.ToInt32(array[i, 6]);
+                        int time = int.Parse(array[i, 6]);
                         if (time < min) min = time;
                     }
                     catch { }
                 }
             }
 
-            return min == 999999 ? 0 : min;
+            if (min == 1000000) return 0;
+            return min;
         }
 
         public int MaxTime_Route(string[,] array, string route)
         {
             int max = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 if (array[i, 2] == route)
                 {
                     try
                     {
-                        int time = Convert.ToInt32(array[i, 6]);
+                        int time = int.Parse(array[i, 6]);
                         if (time > max) max = time;
                     }
                     catch { }
@@ -202,21 +236,23 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
         {
             int sum = 0;
             int count = 0;
+            int rows = array.GetLength(0);
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < rows; i++)
             {
                 if (array[i, 2] == route)
                 {
                     try
                     {
-                        sum += Convert.ToInt32(array[i, 6]);
+                        sum += int.Parse(array[i, 6]);
                         count++;
                     }
                     catch { }
                 }
             }
 
-            return count == 0 ? 0 : sum / count;
+            if (count == 0) return 0;
+            return sum / count;
         }
     }
 }
