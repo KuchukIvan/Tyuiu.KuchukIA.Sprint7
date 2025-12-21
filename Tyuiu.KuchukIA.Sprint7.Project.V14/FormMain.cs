@@ -58,7 +58,8 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
         private void dataGridViewTransports_KIA_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            if (e.RowIndex < 0) return;
+            if (e.ColumnIndex < 0) return;
 
             string id = filtered[e.RowIndex, 0];
             string newValue = dataGridViewTransports_KIA.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString() ?? "";
@@ -77,12 +78,13 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
         private void dataGridViewTransports_KIA_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (e.ColumnIndex < 0 || e.ColumnIndex > 7) return;
+            if (e.ColumnIndex < 0) return;
+            if (e.ColumnIndex > 7) return;
 
             string[] names = { "ID", "TransportType", "RouteNumber", "StartDate", "StartStop", "EndStop", "TravelTime", "Note" };
-            string newColumn = names[e.ColumnIndex];
+            string colName = names[e.ColumnIndex];
 
-            if (sortColumn == newColumn)
+            if (sortColumn == colName)
             {
                 if (sortOrder == SortOrder.Ascending)
                     sortOrder = SortOrder.Descending;
@@ -91,7 +93,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             }
             else
             {
-                sortColumn = newColumn;
+                sortColumn = colName;
                 sortOrder = SortOrder.Ascending;
             }
 
@@ -101,170 +103,196 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
         private void SortData()
         {
-            if (sortColumn == "" || rows == 0) return;
+            if (sortColumn == "") return;
+            if (rows == 0) return;
 
-            string[,] newArray = new string[rows, 8];
+            string[,] tempArray = new string[rows, 8];
 
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    newArray[i, j] = filtered[i, j];
+                    tempArray[i, j] = filtered[i, j];
                 }
             }
 
             for (int i = 0; i < rows - 1; i++)
             {
-                for (int k = i + 1; k < rows; k++)
+                for (int j = i + 1; j < rows; j++)
                 {
                     bool swap = false;
 
                     if (sortColumn == "ID")
                     {
-                        int a = ToInt(newArray[i, 0]);
-                        int b = ToInt(newArray[k, 0]);
-                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                        int a = ToInt(tempArray[i, 0]);
+                        int b = ToInt(tempArray[j, 0]);
+                        swap = (sortOrder == SortOrder.Ascending) ? (a > b) : (a < b);
                     }
                     else if (sortColumn == "TransportType")
                     {
-                        string a = newArray[i, 1] ?? "";
-                        string b = newArray[k, 1] ?? "";
-                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                        string a = tempArray[i, 1] ?? "";
+                        string b = tempArray[j, 1] ?? "";
+                        swap = (sortOrder == SortOrder.Ascending) ? (string.Compare(a, b) > 0) : (string.Compare(a, b) < 0);
                     }
                     else if (sortColumn == "RouteNumber")
                     {
-                        int a = ToInt(newArray[i, 2]);
-                        int b = ToInt(newArray[k, 2]);
-                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                        int a = ToInt(tempArray[i, 2]);
+                        int b = ToInt(tempArray[j, 2]);
+                        swap = (sortOrder == SortOrder.Ascending) ? (a > b) : (a < b);
                     }
                     else if (sortColumn == "StartDate")
                     {
-                        DateTime a = ToDate(newArray[i, 3]);
-                        DateTime b = ToDate(newArray[k, 3]);
-                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                        DateTime a = ToDate(tempArray[i, 3]);
+                        DateTime b = ToDate(tempArray[j, 3]);
+                        swap = (sortOrder == SortOrder.Ascending) ? (a > b) : (a < b);
                     }
                     else if (sortColumn == "StartStop")
                     {
-                        string a = newArray[i, 4] ?? "";
-                        string b = newArray[k, 4] ?? "";
-                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                        string a = tempArray[i, 4] ?? "";
+                        string b = tempArray[j, 4] ?? "";
+                        swap = (sortOrder == SortOrder.Ascending) ? (string.Compare(a, b) > 0) : (string.Compare(a, b) < 0);
                     }
                     else if (sortColumn == "EndStop")
                     {
-                        string a = newArray[i, 5] ?? "";
-                        string b = newArray[k, 5] ?? "";
-                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                        string a = tempArray[i, 5] ?? "";
+                        string b = tempArray[j, 5] ?? "";
+                        swap = (sortOrder == SortOrder.Ascending) ? (string.Compare(a, b) > 0) : (string.Compare(a, b) < 0);
                     }
                     else if (sortColumn == "TravelTime")
                     {
-                        int a = ToInt(newArray[i, 6]);
-                        int b = ToInt(newArray[k, 6]);
-                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                        int a = ToInt(tempArray[i, 6]);
+                        int b = ToInt(tempArray[j, 6]);
+                        swap = (sortOrder == SortOrder.Ascending) ? (a > b) : (a < b);
                     }
                     else if (sortColumn == "Note")
                     {
-                        string a = newArray[i, 7] ?? "";
-                        string b = newArray[k, 7] ?? "";
-                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                        string a = tempArray[i, 7] ?? "";
+                        string b = tempArray[j, 7] ?? "";
+                        swap = (sortOrder == SortOrder.Ascending) ? (string.Compare(a, b) > 0) : (string.Compare(a, b) < 0);
                     }
 
                     if (swap)
                     {
-                        for (int j = 0; j < 8; j++)
+                        for (int k = 0; k < 8; k++)
                         {
-                            string temp = newArray[i, j];
-                            newArray[i, j] = newArray[k, j];
-                            newArray[k, j] = temp;
+                            string temp = tempArray[i, k];
+                            tempArray[i, k] = tempArray[j, k];
+                            tempArray[j, k] = temp;
                         }
                     }
                 }
             }
 
-            filtered = newArray;
+            filtered = tempArray;
             ShowData();
         }
 
         private int ToInt(string text)
         {
-            if (int.TryParse(text, out int result))
-                return result;
-            return 0;
+            int result = 0;
+            int.TryParse(text, out result);
+            return result;
         }
 
         private DateTime ToDate(string text)
         {
-            if (DateTime.TryParse(text, out DateTime result))
-                return result;
-            return DateTime.MinValue;
+            DateTime result = DateTime.MinValue;
+            DateTime.TryParse(text, out result);
+            return result;
         }
 
         private void Filter()
         {
             string searchText = toolStripTextBoxSearch_KIA.Text;
-            string[,] tempData = data;
+            string[,] searchData = data;
 
             if (searchText != "")
             {
-                tempData = ds.Search(data, searchText);
+                searchData = ds.Search(data, searchText);
             }
 
-            int tempRows = tempData.GetLength(0);
-            string[,] tempResult = new string[tempRows, 8];
-            int resultRows = 0;
+            int dataRows = searchData.GetLength(0);
+            string[,] tempResult = new string[dataRows, 8];
+            int resultCount = 0;
 
-            for (int i = 0; i < tempRows; i++)
+            for (int i = 0; i < dataRows; i++)
             {
+                bool add = true;
+
                 if (numericUpDownFilterID_KIA.Value != 0)
                 {
-                    int id = ToInt(tempData[i, 0]);
-                    if (id != (int)numericUpDownFilterID_KIA.Value) continue;
+                    int id = ToInt(searchData[i, 0]);
+                    if (id != (int)numericUpDownFilterID_KIA.Value)
+                        add = false;
                 }
 
-                if (comboBoxFilterType_KIA.SelectedIndex > 0)
+                if (add && comboBoxFilterType_KIA.SelectedIndex > 0)
                 {
-                    if (tempData[i, 1] != comboBoxFilterType_KIA.Text) continue;
+                    if (searchData[i, 1] != comboBoxFilterType_KIA.Text)
+                        add = false;
                 }
 
-                if (numericUpDownFilterRoute_KIA.Value != 0)
+                if (add && numericUpDownFilterRoute_KIA.Value != 0)
                 {
-                    if (tempData[i, 2] != numericUpDownFilterRoute_KIA.Value.ToString()) continue;
+                    int route = ToInt(searchData[i, 2]);
+                    if (route != (int)numericUpDownFilterRoute_KIA.Value)
+                        add = false;
                 }
 
-                if (textBoxFilterStart_KIA.Text != "")
+                if (add && textBoxFilterStart_KIA.Text != "")
                 {
-                    if (!(tempData[i, 4] ?? "").ToLower().Contains(textBoxFilterStart_KIA.Text.ToLower())) continue;
+                    string startStop = searchData[i, 4] ?? "";
+                    if (!startStop.ToLower().Contains(textBoxFilterStart_KIA.Text.ToLower()))
+                        add = false;
                 }
 
-                if (textBoxFilterEnd_KIA.Text != "")
+                if (add && textBoxFilterEnd_KIA.Text != "")
                 {
-                    if (!(tempData[i, 5] ?? "").ToLower().Contains(textBoxFilterEnd_KIA.Text.ToLower())) continue;
+                    string endStop = searchData[i, 5] ?? "";
+                    if (!endStop.ToLower().Contains(textBoxFilterEnd_KIA.Text.ToLower()))
+                        add = false;
                 }
 
-                if (numericUpDownMinTime_KIA.Value != 0)
+                if (add && numericUpDownMinTime_KIA.Value != 0)
                 {
-                    int time = ToInt(tempData[i, 6]);
-                    if (time < (int)numericUpDownMinTime_KIA.Value) continue;
+                    int time = ToInt(searchData[i, 6]);
+                    if (time < (int)numericUpDownMinTime_KIA.Value)
+                        add = false;
                 }
 
-                if (numericUpDownMaxTime_KIA.Value != 0)
+                if (add && numericUpDownMaxTime_KIA.Value != 0)
                 {
-                    int time = ToInt(tempData[i, 6]);
-                    if (time > (int)numericUpDownMaxTime_KIA.Value) continue;
+                    int time = ToInt(searchData[i, 6]);
+                    if (time > (int)numericUpDownMaxTime_KIA.Value)
+                        add = false;
                 }
 
-                DateTime date = ToDate(tempData[i, 3]);
-                if (date < dateTimePickerMinDate_KIA.Value.Date) continue;
-                if (date > dateTimePickerMaxDate_KIA.Value.Date) continue;
-
-                for (int j = 0; j < 8; j++)
+                if (add)
                 {
-                    tempResult[resultRows, j] = tempData[i, j];
+                    DateTime date = ToDate(searchData[i, 3]);
+                    if (date < dateTimePickerMinDate_KIA.Value.Date)
+                        add = false;
                 }
-                resultRows++;
+
+                if (add)
+                {
+                    DateTime date = ToDate(searchData[i, 3]);
+                    if (date > dateTimePickerMaxDate_KIA.Value.Date)
+                        add = false;
+                }
+
+                if (add)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        tempResult[resultCount, j] = searchData[i, j];
+                    }
+                    resultCount++;
+                }
             }
 
-            filtered = new string[resultRows, 8];
-            for (int i = 0; i < resultRows; i++)
+            filtered = new string[resultCount, 8];
+            for (int i = 0; i < resultCount; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
@@ -272,7 +300,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                 }
             }
 
-            rows = resultRows;
+            rows = resultCount;
 
             if (sortColumn != "")
                 SortData();
@@ -290,11 +318,11 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                 return;
             }
 
-            int dataCount = data.GetLength(0);
-            textBoxStatsTransportCount_KIA.Text = dataCount.ToString();
+            int totalRows = data.GetLength(0);
+            textBoxStatsTransportCount_KIA.Text = totalRows.ToString();
 
             int routeCount = 0;
-            for (int i = 0; i < dataCount; i++)
+            for (int i = 0; i < totalRows; i++)
             {
                 bool found = false;
                 for (int j = 0; j < i; j++)
@@ -314,7 +342,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             int trolleys = 0;
             int minibuses = 0;
 
-            for (int i = 0; i < dataCount; i++)
+            for (int i = 0; i < totalRows; i++)
             {
                 string type = data[i, 1];
                 if (type == "Автобус") buses++;
@@ -331,9 +359,9 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             int minTime = 1000000;
             int maxTime = 0;
             int sumTime = 0;
-            int timeCount = 0;
+            int countTime = 0;
 
-            for (int i = 0; i < dataCount; i++)
+            for (int i = 0; i < totalRows; i++)
             {
                 int time = ToInt(data[i, 6]);
                 if (time > 0)
@@ -341,7 +369,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                     if (time < minTime) minTime = time;
                     if (time > maxTime) maxTime = time;
                     sumTime += time;
-                    timeCount++;
+                    countTime++;
                 }
             }
 
@@ -350,19 +378,25 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             textBoxStatsMinTime_KIA.Text = minTime.ToString();
             textBoxStatsMaxTime_KIA.Text = maxTime.ToString();
 
-            if (timeCount > 0)
-                textBoxStatsAvgTime_KIA.Text = (sumTime / timeCount).ToString();
+            if (countTime > 0)
+                textBoxStatsAvgTime_KIA.Text = (sumTime / countTime).ToString();
             else
                 textBoxStatsAvgTime_KIA.Text = "0";
 
             string shortest = "нет";
             string longest = "нет";
 
-            for (int i = 0; i < dataCount; i++)
+            for (int i = 0; i < totalRows; i++)
             {
                 int time = ToInt(data[i, 6]);
-                if (time == minTime && minTime > 0) shortest = $"№{data[i, 2]} ({minTime} мин)";
-                if (time == maxTime && maxTime > 0) longest = $"№{data[i, 2]} ({maxTime} мин)";
+                if (time == minTime && minTime > 0)
+                {
+                    shortest = $"№{data[i, 2]} ({minTime} мин)";
+                }
+                if (time == maxTime && maxTime > 0)
+                {
+                    longest = $"№{data[i, 2]} ({maxTime} мин)";
+                }
             }
 
             textBoxStatsShortest_KIA.Text = shortest;
