@@ -308,22 +308,6 @@
   <metadata name="toolStripTools_KIA.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>132, 17</value>
   </metadata>
-  <data name="toolStripButtonEdit_KIA.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJiSURBVFhH7ZNdSFNhGMenxQEhS0nNRtFFEBWERB9CacGC
-        CpMugkAqzBoimC3W12htrrX5taIVTDbbdAaVUjdKOcJalqT4sXayQZo0bTJKiUHNutgy/z0vy5uud865
-        8Q+/i/d5n8PveV/eIxMp3EiDF3xdN3izB2ydKIsT7oO5B1MdYYSeh+FzvZ32aR+LNgTnftAOq70R069m
-        EI/GMdbxEd6anplBtVvwIbjmticY9o/gWySC0JcpBDuD6LP0w1vfi8GqJjZAZqI1+eGGdXm4YW/HTCSK
-        eQA+3g+jpRZvavvguebFQKWdDZCTaE9uuH7dToA/AATOIhj+gSE+gGZ3K4wmEy5e18Ff6WTyfCLpN5CQ
-        +4uA95eB6CfgZQmu1jtgMFmgLK+ASqth8kJiDetnHyUr/8knAO9pwLEScKbjguEWzl/RiylXknwV0LQa
-        aMnBw3PbJJA75CSXw6UqlEjeLMdd1R4B5foFuUYa+a9nCvrVJJPv+yeflPLkYssXHpwk1y7pa1+UL8rF
-        lA9V7yD5QUnkqdbyzRUTT08Ck03A93HgxSnR5Cxp9zV5X+c+u4E/s4jzFqAxE7DniiJPMZVtUEx1n8H8
-        2E3Exu/h54ABv7uOAa4cOAWWs3CvbcWdCFkxFzAj5jNitlcP3n4YLardgstlR/euy71jKIVWXQqMNmC0
-        rQw2ZXasJD/DQtu7COHklCWt9cdtikMnUKM+gkfVBe/2b82oonoBsYnIJgSTsyyrM6hw+1KRR57FFdN6
-        O7GeyCLSiFRC0CwnNhJbiLXECoKdOIUQJUzGpOnEUlYQLzLZXxbtvdAp2AdfAAAAAElFTkSuQmCC
-</value>
-  </data>
   <data name="toolStripButtonAdd_KIA.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8

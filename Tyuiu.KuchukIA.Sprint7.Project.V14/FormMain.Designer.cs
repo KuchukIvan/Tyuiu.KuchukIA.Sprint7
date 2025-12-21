@@ -87,8 +87,6 @@
             labelFilterType_KIA = new Label();
             labelFilterID_KIA = new Label();
             toolStripTools_KIA = new ToolStrip();
-            toolStripButtonEdit_KIA = new ToolStripButton();
-            toolStripSeparatorEditAdd_KIA = new ToolStripSeparator();
             toolStripButtonAdd_KIA = new ToolStripButton();
             toolStripSeparatorAddDelete_KIA = new ToolStripSeparator();
             toolStripButtonDelete_KIA = new ToolStripButton();
@@ -664,29 +662,13 @@
             // 
             // toolStripTools_KIA
             // 
-            toolStripTools_KIA.Items.AddRange(new ToolStripItem[] { toolStripButtonEdit_KIA, toolStripSeparatorEditAdd_KIA, toolStripButtonAdd_KIA, toolStripSeparatorAddDelete_KIA, toolStripButtonDelete_KIA, toolStripSeparatorDeleteStats_KIA, toolStripButtonStats_KIA, toolStripSeparatorStatsSearch_KIA, toolStripLabelSearchIcon_KIA, toolStripLabelSearch_KIA, toolStripTextBoxSearch_KIA });
+            toolStripTools_KIA.Items.AddRange(new ToolStripItem[] { toolStripButtonAdd_KIA, toolStripSeparatorAddDelete_KIA, toolStripButtonDelete_KIA, toolStripSeparatorDeleteStats_KIA, toolStripButtonStats_KIA, toolStripSeparatorStatsSearch_KIA, toolStripLabelSearchIcon_KIA, toolStripLabelSearch_KIA, toolStripTextBoxSearch_KIA });
             toolStripTools_KIA.Location = new Point(0, 24);
             toolStripTools_KIA.Name = "toolStripTools_KIA";
             toolStripTools_KIA.RenderMode = ToolStripRenderMode.System;
             toolStripTools_KIA.Size = new Size(1169, 25);
             toolStripTools_KIA.TabIndex = 7;
             toolStripTools_KIA.Text = "toolStrip1";
-            // 
-            // toolStripButtonEdit_KIA
-            // 
-            toolStripButtonEdit_KIA.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButtonEdit_KIA.Image = (Image)resources.GetObject("toolStripButtonEdit_KIA.Image");
-            toolStripButtonEdit_KIA.ImageTransparentColor = Color.Magenta;
-            toolStripButtonEdit_KIA.Name = "toolStripButtonEdit_KIA";
-            toolStripButtonEdit_KIA.Size = new Size(23, 22);
-            toolStripButtonEdit_KIA.Text = "toolStripButton2";
-            toolStripButtonEdit_KIA.ToolTipText = "Редактировать выбранную запись";
-            toolStripButtonEdit_KIA.Click += toolStripButtonEdit_KIA_Click;
-            // 
-            // toolStripSeparatorEditAdd_KIA
-            // 
-            toolStripSeparatorEditAdd_KIA.Name = "toolStripSeparatorEditAdd_KIA";
-            toolStripSeparatorEditAdd_KIA.Size = new Size(6, 25);
             // 
             // toolStripButtonAdd_KIA
             // 
@@ -785,7 +767,6 @@
             dataGridViewTransports_KIA.GridColor = SystemColors.ControlDark;
             dataGridViewTransports_KIA.Location = new Point(0, 49);
             dataGridViewTransports_KIA.Name = "dataGridViewTransports_KIA";
-            dataGridViewTransports_KIA.ReadOnly = true;
             dataGridViewTransports_KIA.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             dataGridViewTransports_KIA.RowHeadersVisible = false;
             dataGridViewTransports_KIA.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
@@ -801,27 +782,23 @@
             // 
             colID_KIA.HeaderText = "ID";
             colID_KIA.Name = "colID_KIA";
-            colID_KIA.ReadOnly = true;
             colID_KIA.Width = 50;
             // 
             // colTransportType_KIA
             // 
             colTransportType_KIA.HeaderText = "Вид транспорта";
             colTransportType_KIA.Name = "colTransportType_KIA";
-            colTransportType_KIA.ReadOnly = true;
             colTransportType_KIA.Width = 130;
             // 
             // colRouteNumber_KIA
             // 
             colRouteNumber_KIA.HeaderText = "Номер маршрута";
             colRouteNumber_KIA.Name = "colRouteNumber_KIA";
-            colRouteNumber_KIA.ReadOnly = true;
             // 
             // colStartDate_KIA
             // 
             colStartDate_KIA.HeaderText = "Дата введения";
             colStartDate_KIA.Name = "colStartDate_KIA";
-            colStartDate_KIA.ReadOnly = true;
             colStartDate_KIA.Width = 120;
             // 
             // colStartStop_KIA
@@ -829,20 +806,17 @@
             colStartStop_KIA.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             colStartStop_KIA.HeaderText = "Начальная остановка";
             colStartStop_KIA.Name = "colStartStop_KIA";
-            colStartStop_KIA.ReadOnly = true;
             // 
             // colEndStop_KIA
             // 
             colEndStop_KIA.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             colEndStop_KIA.HeaderText = "Конечная остановка";
             colEndStop_KIA.Name = "colEndStop_KIA";
-            colEndStop_KIA.ReadOnly = true;
             // 
             // colTravelTime_KIA
             // 
             colTravelTime_KIA.HeaderText = "Время в пути (мин)";
             colTravelTime_KIA.Name = "colTravelTime_KIA";
-            colTravelTime_KIA.ReadOnly = true;
             colTravelTime_KIA.Width = 110;
             // 
             // colNote_KIA
@@ -850,7 +824,6 @@
             colNote_KIA.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             colNote_KIA.HeaderText = "Примечание";
             colNote_KIA.Name = "colNote_KIA";
-            colNote_KIA.ReadOnly = true;
             // 
             // FormMain
             // 
@@ -942,8 +915,6 @@
         private Label labelFilterType_KIA;
         private Label labelFilterID_KIA;
         private ToolStrip toolStripTools_KIA;
-        private ToolStripButton toolStripButtonEdit_KIA;
-        private ToolStripSeparator toolStripSeparatorEditAdd_KIA;
         private ToolStripButton toolStripButtonAdd_KIA;
         private ToolStripSeparator toolStripSeparatorAddDelete_KIA;
         private ToolStripButton toolStripButtonDelete_KIA;

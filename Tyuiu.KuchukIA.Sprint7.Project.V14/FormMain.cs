@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using Tyuiu.KuchukIA.Sprint7.Project.V14.Lib;
 
@@ -9,15 +6,13 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 {
     public partial class FormMain : Form
     {
-        private DataService ds = new DataService();
-        private string currentFile = "";
-        private string sortColumn = "";
-        private SortOrder sortOrder = SortOrder.None;
-
-        private int rows = 0;
-        private int columns = 8;
-        private string[,] data = new string[0, 8];
-        private string[,] filtered = new string[0, 8];
+        DataService ds = new DataService();
+        string currentFile = "";
+        string sortColumn = "";
+        SortOrder sortOrder = SortOrder.None;
+        int rows = 0;
+        string[,] data = new string[0, 8];
+        string[,] filtered = new string[0, 8];
 
         public FormMain()
         {
@@ -26,12 +21,11 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            SetupForm();
-        }
-
-        private void SetupForm()
-        {
-            comboBoxFilterType_KIA.Items.AddRange(new string[] { "Все", "Автобус", "Трамвай", "Троллейбус", "Маршрутка" });
+            comboBoxFilterType_KIA.Items.Add("Все");
+            comboBoxFilterType_KIA.Items.Add("Автобус");
+            comboBoxFilterType_KIA.Items.Add("Трамвай");
+            comboBoxFilterType_KIA.Items.Add("Троллейбус");
+            comboBoxFilterType_KIA.Items.Add("Маршрутка");
             comboBoxFilterType_KIA.SelectedIndex = 0;
 
             numericUpDownMaxTime_KIA.Maximum = 1000;
@@ -42,6 +36,8 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
             dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
 
+            dataGridViewTransports_KIA.CellEndEdit += dataGridViewTransports_KIA_CellEndEdit;
+
             UpdateStats();
         }
 
@@ -51,186 +47,239 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
             for (int i = 0; i < rows; i++)
             {
-                dataGridViewTransports_KIA.Rows.Add();
+                int rowIndex = dataGridViewTransports_KIA.Rows.Add();
 
-                for (int j = 0; j < columns; j++)
+                for (int j = 0; j < 8; j++)
                 {
-                    dataGridViewTransports_KIA.Rows[i].Cells[j].Value = filtered[i, j];
+                    dataGridViewTransports_KIA.Rows[rowIndex].Cells[j].Value = filtered[i, j];
                 }
             }
+        }
+
+        private void dataGridViewTransports_KIA_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+
+            string id = filtered[e.RowIndex, 0];
+            string newValue = dataGridViewTransports_KIA.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString() ?? "";
+
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                if (data[i, 0] == id)
+                {
+                    data[i, e.ColumnIndex] = newValue;
+                }
+            }
+
+            filtered[e.RowIndex, e.ColumnIndex] = newValue;
+            UpdateStats();
         }
 
         private void dataGridViewTransports_KIA_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.ColumnIndex < 0 || e.ColumnIndex > 7) return;
 
-            string[] columnNames = { "ID", "TransportType", "RouteNumber", "StartDate",
-                                     "StartStop", "EndStop", "TravelTime", "Note" };
+            string[] names = { "ID", "TransportType", "RouteNumber", "StartDate", "StartStop", "EndStop", "TravelTime", "Note" };
+            string newColumn = names[e.ColumnIndex];
 
-            string colName = columnNames[e.ColumnIndex];
-
-            if (sortColumn == colName)
+            if (sortColumn == newColumn)
             {
-                sortOrder = (sortOrder == SortOrder.Ascending) ? SortOrder.Descending : SortOrder.Ascending;
+                if (sortOrder == SortOrder.Ascending)
+                    sortOrder = SortOrder.Descending;
+                else
+                    sortOrder = SortOrder.Ascending;
             }
             else
             {
-                sortColumn = colName;
+                sortColumn = newColumn;
                 sortOrder = SortOrder.Ascending;
             }
 
             dataGridViewTransports_KIA.Columns[e.ColumnIndex].HeaderCell.SortGlyphDirection = sortOrder;
-
             SortData();
         }
 
         private void SortData()
         {
-            if (string.IsNullOrEmpty(sortColumn) || rows == 0) return;
+            if (sortColumn == "" || rows == 0) return;
 
-            List<string[]> list = ConvertToList(filtered);
+            string[,] newArray = new string[rows, 8];
 
-            switch (sortColumn)
+            for (int i = 0; i < rows; i++)
             {
-                case "ID":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => Convert.ToInt32(r[0])).ToList() :
-                        list.OrderByDescending(r => Convert.ToInt32(r[0])).ToList();
-                    break;
-
-                case "TransportType":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => r[1]).ToList() :
-                        list.OrderByDescending(r => r[1]).ToList();
-                    break;
-
-                case "RouteNumber":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => r[2]).ToList() :
-                        list.OrderByDescending(r => r[2]).ToList();
-                    break;
-
-                case "StartDate":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => DateTime.Parse(r[3])).ToList() :
-                        list.OrderByDescending(r => DateTime.Parse(r[3])).ToList();
-                    break;
-
-                case "StartStop":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => r[4]).ToList() :
-                        list.OrderByDescending(r => r[4]).ToList();
-                    break;
-
-                case "EndStop":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => r[5]).ToList() :
-                        list.OrderByDescending(r => r[5]).ToList();
-                    break;
-
-                case "TravelTime":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => Convert.ToInt32(r[6])).ToList() :
-                        list.OrderByDescending(r => Convert.ToInt32(r[6])).ToList();
-                    break;
-
-                case "Note":
-                    list = (sortOrder == SortOrder.Ascending) ?
-                        list.OrderBy(r => r[7] ?? "").ToList() :
-                        list.OrderByDescending(r => r[7] ?? "").ToList();
-                    break;
+                for (int j = 0; j < 8; j++)
+                {
+                    newArray[i, j] = filtered[i, j];
+                }
             }
 
-            filtered = ConvertToArray(list);
+            for (int i = 0; i < rows - 1; i++)
+            {
+                for (int k = i + 1; k < rows; k++)
+                {
+                    bool swap = false;
+
+                    if (sortColumn == "ID")
+                    {
+                        int a = ToInt(newArray[i, 0]);
+                        int b = ToInt(newArray[k, 0]);
+                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                    }
+                    else if (sortColumn == "TransportType")
+                    {
+                        string a = newArray[i, 1] ?? "";
+                        string b = newArray[k, 1] ?? "";
+                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                    }
+                    else if (sortColumn == "RouteNumber")
+                    {
+                        int a = ToInt(newArray[i, 2]);
+                        int b = ToInt(newArray[k, 2]);
+                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                    }
+                    else if (sortColumn == "StartDate")
+                    {
+                        DateTime a = ToDate(newArray[i, 3]);
+                        DateTime b = ToDate(newArray[k, 3]);
+                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                    }
+                    else if (sortColumn == "StartStop")
+                    {
+                        string a = newArray[i, 4] ?? "";
+                        string b = newArray[k, 4] ?? "";
+                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                    }
+                    else if (sortColumn == "EndStop")
+                    {
+                        string a = newArray[i, 5] ?? "";
+                        string b = newArray[k, 5] ?? "";
+                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                    }
+                    else if (sortColumn == "TravelTime")
+                    {
+                        int a = ToInt(newArray[i, 6]);
+                        int b = ToInt(newArray[k, 6]);
+                        swap = sortOrder == SortOrder.Ascending ? a > b : a < b;
+                    }
+                    else if (sortColumn == "Note")
+                    {
+                        string a = newArray[i, 7] ?? "";
+                        string b = newArray[k, 7] ?? "";
+                        swap = sortOrder == SortOrder.Ascending ? a.CompareTo(b) > 0 : a.CompareTo(b) < 0;
+                    }
+
+                    if (swap)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            string temp = newArray[i, j];
+                            newArray[i, j] = newArray[k, j];
+                            newArray[k, j] = temp;
+                        }
+                    }
+                }
+            }
+
+            filtered = newArray;
             ShowData();
+        }
+
+        private int ToInt(string text)
+        {
+            if (int.TryParse(text, out int result))
+                return result;
+            return 0;
+        }
+
+        private DateTime ToDate(string text)
+        {
+            if (DateTime.TryParse(text, out DateTime result))
+                return result;
+            return DateTime.MinValue;
         }
 
         private void Filter()
         {
-            List<string[]> result = new List<string[]>();
             string searchText = toolStripTextBoxSearch_KIA.Text;
             string[,] tempData = data;
 
-            if (!string.IsNullOrEmpty(searchText))
+            if (searchText != "")
             {
                 tempData = ds.Search(data, searchText);
             }
 
-            for (int i = 0; i < tempData.GetLength(0); i++)
-            {
-                bool matchesFilter = CheckFilters(tempData, i);
+            int tempRows = tempData.GetLength(0);
+            string[,] tempResult = new string[tempRows, 8];
+            int resultRows = 0;
 
-                if (matchesFilter)
+            for (int i = 0; i < tempRows; i++)
+            {
+                if (numericUpDownFilterID_KIA.Value != 0)
                 {
-                    string[] row = new string[columns];
-                    for (int j = 0; j < columns; j++)
-                    {
-                        row[j] = tempData[i, j];
-                    }
-                    result.Add(row);
+                    int id = ToInt(tempData[i, 0]);
+                    if (id != (int)numericUpDownFilterID_KIA.Value) continue;
+                }
+
+                if (comboBoxFilterType_KIA.SelectedIndex > 0)
+                {
+                    if (tempData[i, 1] != comboBoxFilterType_KIA.Text) continue;
+                }
+
+                if (numericUpDownFilterRoute_KIA.Value != 0)
+                {
+                    if (tempData[i, 2] != numericUpDownFilterRoute_KIA.Value.ToString()) continue;
+                }
+
+                if (textBoxFilterStart_KIA.Text != "")
+                {
+                    if (!(tempData[i, 4] ?? "").ToLower().Contains(textBoxFilterStart_KIA.Text.ToLower())) continue;
+                }
+
+                if (textBoxFilterEnd_KIA.Text != "")
+                {
+                    if (!(tempData[i, 5] ?? "").ToLower().Contains(textBoxFilterEnd_KIA.Text.ToLower())) continue;
+                }
+
+                if (numericUpDownMinTime_KIA.Value != 0)
+                {
+                    int time = ToInt(tempData[i, 6]);
+                    if (time < (int)numericUpDownMinTime_KIA.Value) continue;
+                }
+
+                if (numericUpDownMaxTime_KIA.Value != 0)
+                {
+                    int time = ToInt(tempData[i, 6]);
+                    if (time > (int)numericUpDownMaxTime_KIA.Value) continue;
+                }
+
+                DateTime date = ToDate(tempData[i, 3]);
+                if (date < dateTimePickerMinDate_KIA.Value.Date) continue;
+                if (date > dateTimePickerMaxDate_KIA.Value.Date) continue;
+
+                for (int j = 0; j < 8; j++)
+                {
+                    tempResult[resultRows, j] = tempData[i, j];
+                }
+                resultRows++;
+            }
+
+            filtered = new string[resultRows, 8];
+            for (int i = 0; i < resultRows; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    filtered[i, j] = tempResult[i, j];
                 }
             }
 
-            filtered = ConvertToArray(result);
-            rows = filtered.GetLength(0);
+            rows = resultRows;
 
-            if (!string.IsNullOrEmpty(sortColumn))
+            if (sortColumn != "")
                 SortData();
             else
                 ShowData();
 
             UpdateStats();
-        }
-
-        private bool CheckFilters(string[,] tempData, int index)
-        {
-            if (numericUpDownFilterID_KIA.Value != 0)
-            {
-                if (Convert.ToInt32(tempData[index, 0]) != (int)numericUpDownFilterID_KIA.Value)
-                    return false;
-            }
-
-            if (comboBoxFilterType_KIA.SelectedIndex > 0)
-            {
-                if (tempData[index, 1] != comboBoxFilterType_KIA.Text)
-                    return false;
-            }
-
-            if (numericUpDownFilterRoute_KIA.Value != 0)
-            {
-                if (tempData[index, 2] != numericUpDownFilterRoute_KIA.Value.ToString())
-                    return false;
-            }
-
-            if (!string.IsNullOrEmpty(textBoxFilterStart_KIA.Text))
-            {
-                if (!tempData[index, 4].ToLower().Contains(textBoxFilterStart_KIA.Text.ToLower()))
-                    return false;
-            }
-
-            if (!string.IsNullOrEmpty(textBoxFilterEnd_KIA.Text))
-            {
-                if (!tempData[index, 5].ToLower().Contains(textBoxFilterEnd_KIA.Text.ToLower()))
-                    return false;
-            }
-
-            if (numericUpDownMinTime_KIA.Value != 0)
-            {
-                if (Convert.ToInt32(tempData[index, 6]) < (int)numericUpDownMinTime_KIA.Value)
-                    return false;
-            }
-
-            if (numericUpDownMaxTime_KIA.Value != 0)
-            {
-                if (Convert.ToInt32(tempData[index, 6]) > (int)numericUpDownMaxTime_KIA.Value)
-                    return false;
-            }
-
-            DateTime date = DateTime.Parse(tempData[index, 3]);
-            if (date < dateTimePickerMinDate_KIA.Value.Date || date > dateTimePickerMaxDate_KIA.Value.Date)
-                return false;
-
-            return true;
         }
 
         private void UpdateStats()
@@ -241,19 +290,37 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                 return;
             }
 
-            textBoxStatsTransportCount_KIA.Text = ds.VehicleAmount(data).ToString();
-            textBoxStatsRoutesCount_KIA.Text = ds.RouteAmount(data).ToString();
+            int dataCount = data.GetLength(0);
+            textBoxStatsTransportCount_KIA.Text = dataCount.ToString();
 
-            int buses = 0, trams = 0, trolleys = 0, minibuses = 0;
-            for (int i = 0; i < data.GetLength(0); i++)
+            int routeCount = 0;
+            for (int i = 0; i < dataCount; i++)
             {
-                switch (data[i, 1])
+                bool found = false;
+                for (int j = 0; j < i; j++)
                 {
-                    case "Автобус": buses++; break;
-                    case "Трамвай": trams++; break;
-                    case "Троллейбус": trolleys++; break;
-                    case "Маршрутка": minibuses++; break;
+                    if (data[j, 2] == data[i, 2])
+                    {
+                        found = true;
+                        break;
+                    }
                 }
+                if (!found) routeCount++;
+            }
+            textBoxStatsRoutesCount_KIA.Text = routeCount.ToString();
+
+            int buses = 0;
+            int trams = 0;
+            int trolleys = 0;
+            int minibuses = 0;
+
+            for (int i = 0; i < dataCount; i++)
+            {
+                string type = data[i, 1];
+                if (type == "Автобус") buses++;
+                else if (type == "Трамвай") trams++;
+                else if (type == "Троллейбус") trolleys++;
+                else if (type == "Маршрутка") minibuses++;
             }
 
             textBoxStatsBuses_KIA.Text = buses.ToString();
@@ -261,21 +328,41 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             textBoxStatsTrolleys_KIA.Text = trolleys.ToString();
             textBoxStatsMinibuses_KIA.Text = minibuses.ToString();
 
-            textBoxStatsMinTime_KIA.Text = ds.MinTime(data).ToString();
-            textBoxStatsMaxTime_KIA.Text = ds.MaxTime(data).ToString();
-            textBoxStatsAvgTime_KIA.Text = ds.AvgTime(data).ToString();
+            int minTime = 1000000;
+            int maxTime = 0;
+            int sumTime = 0;
+            int timeCount = 0;
 
-            int minTime = ds.MinTime(data);
-            int maxTime = ds.MaxTime(data);
+            for (int i = 0; i < dataCount; i++)
+            {
+                int time = ToInt(data[i, 6]);
+                if (time > 0)
+                {
+                    if (time < minTime) minTime = time;
+                    if (time > maxTime) maxTime = time;
+                    sumTime += time;
+                    timeCount++;
+                }
+            }
+
+            if (minTime == 1000000) minTime = 0;
+
+            textBoxStatsMinTime_KIA.Text = minTime.ToString();
+            textBoxStatsMaxTime_KIA.Text = maxTime.ToString();
+
+            if (timeCount > 0)
+                textBoxStatsAvgTime_KIA.Text = (sumTime / timeCount).ToString();
+            else
+                textBoxStatsAvgTime_KIA.Text = "0";
+
             string shortest = "нет";
             string longest = "нет";
 
-            for (int i = 0; i < data.GetLength(0); i++)
+            for (int i = 0; i < dataCount; i++)
             {
-                if (Convert.ToInt32(data[i, 6]) == minTime)
-                    shortest = $"№{data[i, 2]} ({minTime} мин)";
-                if (Convert.ToInt32(data[i, 6]) == maxTime)
-                    longest = $"№{data[i, 2]} ({maxTime} мин)";
+                int time = ToInt(data[i, 6]);
+                if (time == minTime && minTime > 0) shortest = $"№{data[i, 2]} ({minTime} мин)";
+                if (time == maxTime && maxTime > 0) longest = $"№{data[i, 2]} ({maxTime} мин)";
             }
 
             textBoxStatsShortest_KIA.Text = shortest;
@@ -297,38 +384,6 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             textBoxStatsLongest_KIA.Text = "нет";
         }
 
-        private List<string[]> ConvertToList(string[,] array)
-        {
-            List<string[]> list = new List<string[]>();
-
-            for (int i = 0; i < array.GetLength(0); i++)
-            {
-                string[] row = new string[columns];
-                for (int j = 0; j < columns; j++)
-                {
-                    row[j] = array[i, j];
-                }
-                list.Add(row);
-            }
-
-            return list;
-        }
-
-        private string[,] ConvertToArray(List<string[]> list)
-        {
-            string[,] array = new string[list.Count, columns];
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                for (int j = 0; j < columns; j++)
-                {
-                    array[i, j] = list[i][j];
-                }
-            }
-
-            return array;
-        }
-
         private void ToolStripMenuItemNewTable_KIA_Click(object sender, EventArgs e)
         {
             if (data.GetLength(0) > 0)
@@ -340,14 +395,32 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                 if (result != DialogResult.Yes) return;
             }
 
-            ClearAll();
+            data = new string[0, 8];
+            filtered = new string[0, 8];
+            rows = 0;
+            dataGridViewTransports_KIA.Rows.Clear();
+            currentFile = "";
+            sortColumn = "";
+            sortOrder = SortOrder.None;
+
+            numericUpDownFilterID_KIA.Value = 0;
+            comboBoxFilterType_KIA.SelectedIndex = 0;
+            numericUpDownFilterRoute_KIA.Value = 0;
+            textBoxFilterStart_KIA.Text = "";
+            textBoxFilterEnd_KIA.Text = "";
+            numericUpDownMinTime_KIA.Value = 0;
+            numericUpDownMaxTime_KIA.Value = 0;
+            toolStripTextBoxSearch_KIA.Text = "";
+            dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
+            dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
+
+            UpdateStats();
         }
 
         private void toolStripMenuItemOpen_KIA_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.Filter = "CSV файлы (*.csv)|*.csv|Все файлы (*.*)|*.*";
-            dlg.Title = "Открыть файл";
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
@@ -355,26 +428,34 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                 {
                     currentFile = dlg.FileName;
                     data = ds.LoadFromFile(currentFile);
-                    filtered = (string[,])data.Clone();
-                    rows = data.GetLength(0);
 
+                    int dataRows = data.GetLength(0);
+                    filtered = new string[dataRows, 8];
+
+                    for (int i = 0; i < dataRows; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            filtered[i, j] = data[i, j];
+                        }
+                    }
+
+                    rows = dataRows;
                     ShowData();
                     UpdateStats();
 
-                    MessageBox.Show($"Загружено {rows} записей", "Успешно",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Загружено {rows} записей", "Успешно");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
                 }
             }
         }
 
         private void toolStripMenuItemSave_KIA_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(currentFile))
+            if (currentFile == "")
             {
                 toolStripMenuItemSaveAs_KIA_Click(sender, e);
                 return;
@@ -383,13 +464,11 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             try
             {
                 ds.SaveToFile(currentFile, data);
-                MessageBox.Show("Файл сохранён", "Сохранение",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Файл сохранён", "Сохранение");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
             }
         }
 
@@ -397,8 +476,6 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
         {
             SaveFileDialog dlg = new SaveFileDialog();
             dlg.Filter = "CSV файлы (*.csv)|*.csv";
-            dlg.Title = "Сохранить файл";
-            dlg.FileName = "transport.csv";
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
@@ -409,131 +486,55 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 
         private void toolStripButtonAdd_KIA_Click(object sender, EventArgs e)
         {
-            FormAddEdit form = new FormAddEdit();
-            if (form.ShowDialog() == DialogResult.OK && form.ResultRow != null)
-            {
-                int newID = GetMaxID() + 1;
-                string[] row = form.ResultRow;
-                row[0] = newID.ToString();
-
-                data = AddRow(data, row);
-                filtered = (string[,])data.Clone();
-                rows = data.GetLength(0);
-
-                if (!string.IsNullOrEmpty(sortColumn))
-                    SortData();
-                else
-                    ShowData();
-
-                UpdateStats();
-            }
-        }
-
-        private void toolStripButtonEdit_KIA_Click(object sender, EventArgs e)
-        {
-            if (dataGridViewTransports_KIA.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Выберите запись для редактирования", "Информация",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            int index = dataGridViewTransports_KIA.SelectedRows[0].Index;
-            if (index >= rows) return;
-
-            string[] row = new string[columns];
-            for (int j = 0; j < columns; j++)
-            {
-                row[j] = filtered[index, j];
-            }
-
-            FormAddEdit form = new FormAddEdit(row);
-            if (form.ShowDialog() == DialogResult.OK && form.ResultRow != null)
-            {
-                UpdateRow(row[0], form.ResultRow);
-
-                if (!string.IsNullOrEmpty(sortColumn))
-                    SortData();
-                else
-                    ShowData();
-
-                UpdateStats();
-            }
-        }
-
-        private int GetMaxID()
-        {
-            int max = 0;
+            int maxID = 0;
             for (int i = 0; i < data.GetLength(0); i++)
             {
-                try
-                {
-                    int id = Convert.ToInt32(data[i, 0]);
-                    if (id > max) max = id;
-                }
-                catch { }
+                int id = ToInt(data[i, 0]);
+                if (id > maxID) maxID = id;
             }
-            return max;
-        }
+            int newID = maxID + 1;
 
-        private void UpdateRow(string id, string[] newData)
-        {
-            for (int i = 0; i < data.GetLength(0); i++)
+            int oldRows = data.GetLength(0);
+            string[,] newData = new string[oldRows + 1, 8];
+
+            for (int i = 0; i < oldRows; i++)
             {
-                if (data[i, 0] == id)
+                for (int j = 0; j < 8; j++)
                 {
-                    for (int j = 0; j < columns; j++)
-                    {
-                        data[i, j] = newData[j];
-                    }
+                    newData[i, j] = data[i, j];
                 }
             }
 
-            for (int i = 0; i < filtered.GetLength(0); i++)
-            {
-                if (filtered[i, 0] == id)
-                {
-                    for (int j = 0; j < columns; j++)
-                    {
-                        filtered[i, j] = newData[j];
-                    }
-                }
-            }
-        }
+            newData[oldRows, 0] = newID.ToString();
 
-        private string[,] AddRow(string[,] array, string[] row)
-        {
-            int currentRows = array.GetLength(0);
-            string[,] newArray = new string[currentRows + 1, columns];
+            data = newData;
 
-            for (int i = 0; i < currentRows; i++)
+            int dataRows = data.GetLength(0);
+            filtered = new string[dataRows, 8];
+            for (int i = 0; i < dataRows; i++)
             {
-                for (int j = 0; j < columns; j++)
+                for (int j = 0; j < 8; j++)
                 {
-                    newArray[i, j] = array[i, j];
+                    filtered[i, j] = data[i, j];
                 }
             }
 
-            for (int j = 0; j < columns; j++)
-            {
-                newArray[currentRows, j] = row[j];
-            }
-
-            return newArray;
+            rows = dataRows;
+            ShowData();
+            UpdateStats();
         }
 
         private void toolStripButtonDelete_KIA_Click(object sender, EventArgs e)
         {
             if (dataGridViewTransports_KIA.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите запись для удаления", "Информация",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Выберите запись для удаления");
                 return;
             }
 
             DialogResult result = MessageBox.Show(
                 "Удалить выбранную запись?",
-                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                "Подтверждение", MessageBoxButtons.YesNo);
 
             if (result == DialogResult.Yes)
             {
@@ -542,10 +543,56 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
                 {
                     string id = filtered[index, 0];
 
-                    data = RemoveRow(data, id);
-                    filtered = RemoveRow(filtered, id);
-                    rows = data.GetLength(0);
+                    int dataRows = data.GetLength(0);
+                    int newDataRows = 0;
 
+                    for (int i = 0; i < dataRows; i++)
+                    {
+                        if (data[i, 0] != id) newDataRows++;
+                    }
+
+                    string[,] newData = new string[newDataRows, 8];
+                    int newIndex = 0;
+
+                    for (int i = 0; i < dataRows; i++)
+                    {
+                        if (data[i, 0] != id)
+                        {
+                            for (int j = 0; j < 8; j++)
+                            {
+                                newData[newIndex, j] = data[i, j];
+                            }
+                            newIndex++;
+                        }
+                    }
+
+                    data = newData;
+
+                    int filteredRows = filtered.GetLength(0);
+                    int newFilteredRows = 0;
+
+                    for (int i = 0; i < filteredRows; i++)
+                    {
+                        if (filtered[i, 0] != id) newFilteredRows++;
+                    }
+
+                    string[,] newFiltered = new string[newFilteredRows, 8];
+                    newIndex = 0;
+
+                    for (int i = 0; i < filteredRows; i++)
+                    {
+                        if (filtered[i, 0] != id)
+                        {
+                            for (int j = 0; j < 8; j++)
+                            {
+                                newFiltered[newIndex, j] = filtered[i, j];
+                            }
+                            newIndex++;
+                        }
+                    }
+
+                    filtered = newFiltered;
+                    rows = data.GetLength(0);
                     ShowData();
                     UpdateStats();
                 }
@@ -556,50 +603,50 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
         {
             if (dataGridViewTransports_KIA.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите маршрут для статистики", "Информация",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Выберите маршрут для статистики");
                 return;
             }
 
             int index = dataGridViewTransports_KIA.SelectedRows[0].Index;
             if (index >= rows) return;
 
-            List<string[]> sameType = new List<string[]>();
+            string route = filtered[index, 2];
+            string type = filtered[index, 1];
+
+            int count = 0;
+            for (int i = 0; i < data.GetLength(0); i++)
+            {
+                if (data[i, 2] == route && data[i, 1] == type) count++;
+            }
+
+            string[][] array = new string[count][];
+            int arrayIndex = 0;
 
             for (int i = 0; i < data.GetLength(0); i++)
             {
-                if (data[i, 2] == filtered[index, 2] && data[i, 1] == filtered[index, 1])
+                if (data[i, 2] == route && data[i, 1] == type)
                 {
-                    string[] row = new string[columns];
-                    for (int j = 0; j < columns; j++)
+                    array[arrayIndex] = new string[8];
+                    for (int j = 0; j < 8; j++)
                     {
-                        row[j] = data[i, j];
+                        array[arrayIndex][j] = data[i, j];
                     }
-                    sameType.Add(row);
+                    arrayIndex++;
                 }
             }
 
-            if (sameType.Count > 0)
+            if (count > 0)
             {
                 FormStatistics stats = new FormStatistics(
                     filtered[index, 0], filtered[index, 1], filtered[index, 2],
                     filtered[index, 3], filtered[index, 4], filtered[index, 5],
-                    filtered[index, 6], sameType.ToArray()
+                    filtered[index, 6], array
                 );
                 stats.ShowDialog();
             }
         }
 
         private void buttonResetFilter_KIA_Click(object sender, EventArgs e)
-        {
-            ResetFilters();
-            filtered = (string[,])data.Clone();
-            rows = data.GetLength(0);
-            ShowData();
-            UpdateStats();
-        }
-
-        private void ResetFilters()
         {
             numericUpDownFilterID_KIA.Value = 0;
             comboBoxFilterType_KIA.SelectedIndex = 0;
@@ -611,26 +658,21 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             toolStripTextBoxSearch_KIA.Text = "";
             dateTimePickerMinDate_KIA.Value = new DateTime(2020, 1, 1);
             dateTimePickerMaxDate_KIA.Value = DateTime.Now.AddDays(1);
-        }
 
-        private string[,] RemoveRow(string[,] array, string id)
-        {
-            List<string[]> list = new List<string[]>();
+            int dataRows = data.GetLength(0);
+            filtered = new string[dataRows, 8];
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < dataRows; i++)
             {
-                if (array[i, 0] != id)
+                for (int j = 0; j < 8; j++)
                 {
-                    string[] row = new string[columns];
-                    for (int j = 0; j < columns; j++)
-                    {
-                        row[j] = array[i, j];
-                    }
-                    list.Add(row);
+                    filtered[i, j] = data[i, j];
                 }
             }
 
-            return ConvertToArray(list);
+            rows = dataRows;
+            ShowData();
+            UpdateStats();
         }
 
         private void toolStripMenuItemManual_KIA_Click(object sender, EventArgs e)
@@ -641,8 +683,9 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 • Открыть, сохранить, создать новую таблицу
 
 Работа с данными:
-• Добавить, редактировать, удалить записи
-• Просмотр статистики по маршрутам
+• Нажмите + чтобы добавить пустую строку
+• Нажмите на ячейку, чтобы редактировать
+• Удалите выбранную запись
 
 Фильтрация:
 • Используйте поля справа для поиска
@@ -652,8 +695,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
 • Кликните по заголовку столбца
 • Повторный клик меняет порядок";
 
-            MessageBox.Show(help, "Руководство",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(help, "Руководство");
         }
 
         private void toolStripMenuItemAbout_KIA_Click(object sender, EventArgs e)
@@ -662,33 +704,18 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14
             about.ShowDialog();
         }
 
-        private void ClearAll()
-        {
-            data = new string[0, columns];
-            filtered = new string[0, columns];
-            rows = 0;
-            dataGridViewTransports_KIA.Rows.Clear();
-            currentFile = "";
-            sortColumn = "";
-            sortOrder = SortOrder.None;
-            ResetFilters();
-            UpdateStats();
-        }
-
-        // Обработчики событий фильтров
-        private void numericUpDownFilterID_KIA_ValueChanged(object sender, EventArgs e) => Filter();
-        private void numericUpDownFilterRoute_KIA_ValueChanged(object sender, EventArgs e) => Filter();
-        private void numericUpDownMinTime_KIA_ValueChanged(object sender, EventArgs e) => Filter();
-        private void numericUpDownMaxTime_KIA_ValueChanged(object sender, EventArgs e) => Filter();
-        private void comboBoxFilterType_KIA_SelectedIndexChanged(object sender, EventArgs e) => Filter();
-        private void dateTimePickerMinDate_KIA_ValueChanged(object sender, EventArgs e) => Filter();
-        private void dateTimePickerMaxDate_KIA_ValueChanged(object sender, EventArgs e) => Filter();
-        private void textBoxFilterStart_KIA_TextChanged(object sender, EventArgs e) => Filter();
-        private void textBoxFilterEnd_KIA_TextChanged(object sender, EventArgs e) => Filter();
-        private void toolStripTextBoxSearch_KIA_TextChanged(object sender, EventArgs e) => Filter();
+        private void numericUpDownFilterID_KIA_ValueChanged(object sender, EventArgs e) { Filter(); }
+        private void numericUpDownFilterRoute_KIA_ValueChanged(object sender, EventArgs e) { Filter(); }
+        private void numericUpDownMinTime_KIA_ValueChanged(object sender, EventArgs e) { Filter(); }
+        private void numericUpDownMaxTime_KIA_ValueChanged(object sender, EventArgs e) { Filter(); }
+        private void comboBoxFilterType_KIA_SelectedIndexChanged(object sender, EventArgs e) { Filter(); }
+        private void dateTimePickerMinDate_KIA_ValueChanged(object sender, EventArgs e) { Filter(); }
+        private void dateTimePickerMaxDate_KIA_ValueChanged(object sender, EventArgs e) { Filter(); }
+        private void textBoxFilterStart_KIA_TextChanged(object sender, EventArgs e) { Filter(); }
+        private void textBoxFilterEnd_KIA_TextChanged(object sender, EventArgs e) { Filter(); }
+        private void toolStripTextBoxSearch_KIA_TextChanged(object sender, EventArgs e) { Filter(); }
 
         private void dataGridViewTransports_KIA_CellContentClick(object sender, DataGridViewCellEventArgs e) { }
         private void labelFilterID_KIA_Click(object sender, EventArgs e) { }
     }
 }
-

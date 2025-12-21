@@ -49,12 +49,13 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
 
         public string[,] Search(string[,] array, string text)
         {
-            int count = 0;
             int rows = array.GetLength(0);
+            int count = 0;
 
             for (int i = 0; i < rows; i++)
             {
                 bool found = false;
+
                 for (int j = 0; j < 8; j++)
                 {
                     if (array[i, j].ToLower().Contains(text.ToLower()))
@@ -63,6 +64,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
                         break;
                     }
                 }
+
                 if (found) count++;
             }
 
@@ -72,6 +74,7 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
             for (int i = 0; i < rows; i++)
             {
                 bool found = false;
+
                 for (int j = 0; j < 8; j++)
                 {
                     if (array[i, j].ToLower().Contains(text.ToLower()))
@@ -84,7 +87,9 @@ namespace Tyuiu.KuchukIA.Sprint7.Project.V14.Lib
                 if (found)
                 {
                     for (int j = 0; j < 8; j++)
+                    {
                         result[index, j] = array[i, j];
+                    }
                     index++;
                 }
             }
