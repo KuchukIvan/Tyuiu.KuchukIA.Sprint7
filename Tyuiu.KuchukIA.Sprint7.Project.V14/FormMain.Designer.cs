@@ -34,7 +34,7 @@
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             menuStrip_KIA = new MenuStrip();
             toolStripMenuItemFile_KIA = new ToolStripMenuItem();
-            ToolStripMenuItemNewTable_KIA = new ToolStripMenuItem();
+            toolStripMenuItemNewTable_KIA = new ToolStripMenuItem();
             toolStripMenuItemOpen_KIA = new ToolStripMenuItem();
             toolStripMenuItemSave_KIA = new ToolStripMenuItem();
             toolStripMenuItemSaveAs_KIA = new ToolStripMenuItem();
@@ -128,21 +128,21 @@
             // 
             // toolStripMenuItemFile_KIA
             // 
-            toolStripMenuItemFile_KIA.DropDownItems.AddRange(new ToolStripItem[] { ToolStripMenuItemNewTable_KIA, toolStripMenuItemOpen_KIA, toolStripMenuItemSave_KIA, toolStripMenuItemSaveAs_KIA });
+            toolStripMenuItemFile_KIA.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItemNewTable_KIA, toolStripMenuItemOpen_KIA, toolStripMenuItemSave_KIA, toolStripMenuItemSaveAs_KIA });
             toolStripMenuItemFile_KIA.Name = "toolStripMenuItemFile_KIA";
             toolStripMenuItemFile_KIA.Size = new Size(48, 20);
             toolStripMenuItemFile_KIA.Text = "Файл";
             // 
-            // ToolStripMenuItemNewTable_KIA
+            // toolStripMenuItemNewTable_KIA
             // 
-            ToolStripMenuItemNewTable_KIA.Image = (Image)resources.GetObject("ToolStripMenuItemNewTable_KIA.Image");
-            ToolStripMenuItemNewTable_KIA.ImageScaling = ToolStripItemImageScaling.None;
-            ToolStripMenuItemNewTable_KIA.Name = "ToolStripMenuItemNewTable_KIA";
-            ToolStripMenuItemNewTable_KIA.Size = new Size(179, 38);
-            ToolStripMenuItemNewTable_KIA.Text = "Новая таблица";
-            ToolStripMenuItemNewTable_KIA.TextDirection = ToolStripTextDirection.Horizontal;
-            ToolStripMenuItemNewTable_KIA.ToolTipText = "Создать новую таблицу";
-            ToolStripMenuItemNewTable_KIA.Click += ToolStripMenuItemNewTable_KIA_Click;
+            toolStripMenuItemNewTable_KIA.Image = (Image)resources.GetObject("toolStripMenuItemNewTable_KIA.Image");
+            toolStripMenuItemNewTable_KIA.ImageScaling = ToolStripItemImageScaling.None;
+            toolStripMenuItemNewTable_KIA.Name = "toolStripMenuItemNewTable_KIA";
+            toolStripMenuItemNewTable_KIA.Size = new Size(179, 38);
+            toolStripMenuItemNewTable_KIA.Text = "Новая таблица";
+            toolStripMenuItemNewTable_KIA.TextDirection = ToolStripTextDirection.Horizontal;
+            toolStripMenuItemNewTable_KIA.ToolTipText = "Создать новую таблицу";
+            toolStripMenuItemNewTable_KIA.Click += ToolStripMenuItemNewTable_KIA_Click;
             // 
             // toolStripMenuItemOpen_KIA
             // 
@@ -516,7 +516,7 @@
             // 
             textBoxFilterEnd_KIA.Location = new Point(14, 383);
             textBoxFilterEnd_KIA.Name = "textBoxFilterEnd_KIA";
-            textBoxFilterEnd_KIA.Size = new Size(212, 25);
+            textBoxFilterEnd_KIA.Size = new Size(238, 25);
             textBoxFilterEnd_KIA.TabIndex = 16;
             toolTip_KIA.SetToolTip(textBoxFilterEnd_KIA, "Поиск по конечной остановке");
             textBoxFilterEnd_KIA.TextChanged += textBoxFilterEnd_KIA_TextChanged;
@@ -525,7 +525,7 @@
             // 
             textBoxFilterStart_KIA.Location = new Point(14, 317);
             textBoxFilterStart_KIA.Name = "textBoxFilterStart_KIA";
-            textBoxFilterStart_KIA.Size = new Size(212, 25);
+            textBoxFilterStart_KIA.Size = new Size(238, 25);
             textBoxFilterStart_KIA.TabIndex = 15;
             toolTip_KIA.SetToolTip(textBoxFilterStart_KIA, "Поиск по начальной остановке");
             textBoxFilterStart_KIA.TextChanged += textBoxFilterStart_KIA_TextChanged;
@@ -862,7 +862,7 @@
 
         private MenuStrip menuStrip_KIA;
         private ToolStripMenuItem toolStripMenuItemFile_KIA;
-        private ToolStripMenuItem ToolStripMenuItemNewTable_KIA;
+        private ToolStripMenuItem toolStripMenuItemNewTable_KIA;
         private ToolStripMenuItem toolStripMenuItemOpen_KIA;
         private ToolStripMenuItem toolStripMenuItemSave_KIA;
         private ToolStripMenuItem toolStripMenuItemSaveAs_KIA;
